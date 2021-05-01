@@ -20,54 +20,54 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(publish_rate_in_hz);
 
     hexapod_msgs::LegsJoints msg1;
-    msg1.left_front_leg.coxa = 90.f;
-    msg1.left_front_leg.femur = 90.f;
-    msg1.left_front_leg.tibia = 90.f;
+    msg1.left_front_leg.coxa = 0.f;
+    msg1.left_front_leg.femur = 0.f;
+    msg1.left_front_leg.tibia = 0.f;
 
-    msg1.left_mid_leg.coxa = 90.f;
-    msg1.left_mid_leg.femur = 90.f;
-    msg1.left_mid_leg.tibia = 90.f;
+    msg1.left_mid_leg.coxa = 0.f;
+    msg1.left_mid_leg.femur = 0.f;
+    msg1.left_mid_leg.tibia = 0.f;
 
-    msg1.left_back_leg.coxa = 90.f;
-    msg1.left_back_leg.femur = 90.f;
-    msg1.left_back_leg.tibia = 90.f;
+    msg1.left_back_leg.coxa = 0.f;
+    msg1.left_back_leg.femur = 0.f;
+    msg1.left_back_leg.tibia = 0.f;
 
-    msg1.right_front_leg.coxa = 90.f;
-    msg1.right_front_leg.femur = 90.f;
-    msg1.right_front_leg.tibia = 90.f;
+    msg1.right_front_leg.coxa = 0.f;
+    msg1.right_front_leg.femur = 0.f;
+    msg1.right_front_leg.tibia = 0.f;
 
-    msg1.right_mid_leg.coxa = 90.f;
-    msg1.right_mid_leg.femur = 90.f;
-    msg1.right_mid_leg.tibia = 90.f;
+    msg1.right_mid_leg.coxa = 0.f;
+    msg1.right_mid_leg.femur = 0.f;
+    msg1.right_mid_leg.tibia = 0.f;
 
-    msg1.right_back_leg.coxa = 90.f;
-    msg1.right_back_leg.femur = 90.f;
-    msg1.right_back_leg.tibia = 90.f;
+    msg1.right_back_leg.coxa = 0.f;
+    msg1.right_back_leg.femur = 0.f;
+    msg1.right_back_leg.tibia = 0.f;
 
     hexapod_msgs::LegsJoints msg2;
-    msg2.left_front_leg.coxa = 90.f;
-    msg2.left_front_leg.femur = 90.f;
-    msg2.left_front_leg.tibia = 90.f;
+    msg2.left_front_leg.coxa = 0.f;
+    msg2.left_front_leg.femur = 0.f;
+    msg2.left_front_leg.tibia = 0.f;
 
-    msg2.left_mid_leg.coxa = 90.f;
-    msg2.left_mid_leg.femur = 110.f;
-    msg2.left_mid_leg.tibia = 90.f;
+    msg2.left_mid_leg.coxa = 0.f;
+    msg2.left_mid_leg.femur = 0.349066f;
+    msg2.left_mid_leg.tibia = 0.f;;
 
-    msg2.left_back_leg.coxa = 90.f;
-    msg2.left_back_leg.femur = 90.f;
-    msg2.left_back_leg.tibia = 90.f;
+    msg2.left_back_leg.coxa = 0.f;
+    msg2.left_back_leg.femur = 0.f;
+    msg2.left_back_leg.tibia = 0.f;
 
-    msg2.right_front_leg.coxa = 90.f;
-    msg2.right_front_leg.femur = 70.f;
-    msg2.right_front_leg.tibia = 90.f;
+    msg2.right_front_leg.coxa = 0.f;
+    msg2.right_front_leg.femur = -0.349066f;
+    msg2.right_front_leg.tibia = 0.f;
 
-    msg2.right_mid_leg.coxa = 90.f;
-    msg2.right_mid_leg.femur = 90.f;
-    msg2.right_mid_leg.tibia = 90.f;
+    msg2.right_mid_leg.coxa = 0.f;
+    msg2.right_mid_leg.femur = 0.f;
+    msg2.right_mid_leg.tibia = 0.f;
 
-    msg2.right_back_leg.coxa = 90.f;
-    msg2.right_back_leg.femur = 70.f;
-    msg2.right_back_leg.tibia = 90.f;
+    msg2.right_back_leg.coxa = 0.f;
+    msg2.right_back_leg.femur = -0.349066f;
+    msg2.right_back_leg.tibia = 0.f;
 
     int i = 0;
     while (ros::ok())
