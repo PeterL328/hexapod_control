@@ -6,7 +6,7 @@
 int main(int argc, char **argv)
 {
     const std::string node_name = "test_joints";
-    const std::string joints_status_topic_name = "joints_state";
+    const std::string joints_command_topic_name = "joints_command";
 
     ros::init(argc, argv, node_name);
     ros::NodeHandle n("~");
@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     n.param("publish_rate", publish_rate_in_hz, 0.3f);
     ROS_INFO("Publishing at %fHz.", publish_rate_in_hz);
 
-    ros::Publisher test_joints_pub = n.advertise<hexapod_msgs::LegsJoints>(joints_status_topic_name, 1);
+    ros::Publisher test_joints_pub = n.advertise<hexapod_msgs::LegsJoints>(joints_command_topic_name, 1);
     ros::Rate loop_rate(publish_rate_in_hz);
 
     hexapod_msgs::LegsJoints msg1;
