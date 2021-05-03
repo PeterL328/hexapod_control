@@ -1,7 +1,7 @@
-# Hexapod kinematics
+# Hexapod control
 
 ## About The Project
-This ROS package is used by the [Hexapod project](https://github.com/PeterL328/hexapod) and contains kinematics solvers for the robot.
+This ROS package is used by the [Hexapod project](https://github.com/PeterL328/hexapod) and contains control nodes for the hexapod which includes the kinematic solvers.
 At the moment, the package is meant for the [Freenove Big Hexapod kit](https://github.com/Freenove/Freenove_Big_Hexapod_Robot_Kit_for_Raspberry_Pi) and is meant for their custom Raspberry-pi shield.
 
 ## Getting Started
