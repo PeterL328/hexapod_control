@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     msg2.left_front_leg.tibia = 0.f;
 
     msg2.left_mid_leg.coxa = 0.f;
-    msg2.left_mid_leg.femur = 0.349066f;
+    msg2.left_mid_leg.femur = -0.349066f;
     msg2.left_mid_leg.tibia = 0.f;;
 
     msg2.left_back_leg.coxa = 0.f;
