@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     // Get values from arguments
     float publish_rate_in_hz;
     n.param("publish_rate", publish_rate_in_hz, 0.3f);
-    ROS_INFO("Publishing at %fHz.", publish_rate_in_hz);
+    ROS_INFO("Publishing at %fHz on %s.", publish_rate_in_hz, joints_command_topic_name.c_str());
 
     ros::Publisher test_joints_pub = n.advertise<hexapod_msgs::LegsJoints>(joints_command_topic_name, 1);
     ros::Rate loop_rate(publish_rate_in_hz);
