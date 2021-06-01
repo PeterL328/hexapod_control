@@ -139,6 +139,13 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/hexapod_control_node.cpp)
 
 add_executable(
+    hexapod_control
+    ${SRC_DIRS}/hexapod_control.cpp
+    ${SRC_DIRS}/hexapod_controller.cpp
+    ${SRC_DIRS}/hexapod_model.cpp
+)
+
+add_executable(
     test_joints
     ${SRC_DIRS}/test_joints.cpp
 )
@@ -158,6 +165,7 @@ add_executable(
 #   ${catkin_LIBRARIES}
 # )
 
+target_link_libraries(hexapod_control ${catkin_LIBRARIES})
 target_link_libraries(test_joints ${catkin_LIBRARIES})
 
 #############
