@@ -8,19 +8,24 @@ HexapodModel::HexapodModel() {
     // Read from parameter server to populate values.
     current_status_ = HexapodModel::RobotState::Inactive;
     previous_status_ = HexapodModel::RobotState::Inactive;
-
-    // Configure publisher.
-    joints_command_pub_ = nh_.advertise<hexapod_msgs::LegsJoints>(joints_command_topic_name_, 1);
 }
 
-void HexapodModel::publish_joints() {
-    joints_command_pub_.publish(legs_joints_);
-}
-
-HexapodModel::RobotState HexapodModel::get_current_robot_status() {
+HexapodModel::RobotState HexapodModel::get_current_robot_status() const {
     return current_status_;
 }
 
-HexapodModel::RobotState HexapodModel::get_previous_robot_status() {
+void HexapodModel::set_current_robot_status(RobotState state) {
+    current_status_ = state;
+}
+
+HexapodModel::RobotState HexapodModel::get_previous_robot_status() const {
     return previous_status_;
+}
+
+void HexapodModel::set_previous_robot_status(RobotState state) {
+    previous_status_ = state;
+}
+
+hexapod_msgs::LegsJoints HexapodModel::get_legs_joints() const {
+    return legs_joints_;
 }

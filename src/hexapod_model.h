@@ -18,26 +18,31 @@ public:
     /// Creates an instance of a Hexapod Model object.
     explicit HexapodModel();
 
-    /// Publishes the joint status to the joints_command topic.
-    void publish_joints();
+    /// Gets the current robot status.
+    /// \return The current robot state.
+    RobotState get_current_robot_status() const;
+
+    /// Sets the current robot status.
+    /// \param state
+    void set_current_robot_status(RobotState state);
 
     /// Gets the current robot status.
-    RobotState get_current_robot_status();
+    /// \return The previous robot state.
+    RobotState get_previous_robot_status() const;
 
-    /// Gets the current robot status.
-    RobotState get_previous_robot_status();
+    /// Sets the current robot status.
+    /// \param The previous robot state.
+    void set_previous_robot_status(RobotState state);
+
+    /// Gets the legs joints.
+    /// \return The legs joints message.
+    hexapod_msgs::LegsJoints get_legs_joints() const;
 
 private:
     RobotState current_status_;
     RobotState previous_status_;
 
     hexapod_msgs::LegsJoints legs_joints_;
-
-    // Topic names.
-    const std::string joints_command_topic_name_{"joints_command"};
-
-    // Publisher.
-    ros::Publisher joints_command_pub_;
 
     ros::NodeHandle nh_{"~"};
 };

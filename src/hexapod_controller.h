@@ -16,21 +16,34 @@
 class HexapodController {
 public:
     /// Creates an instance of a Hexapod Controller object.
-    explicit HexapodController(std::shared_ptr<HexapodModel> hexapod_model_ptr);
+    explicit HexapodController();
+
+
+    /// Updates the state of the model and executes the appropriate action.
+    void state_transition();
 
     /// Callback function for twist messages.
+    /// \param twist The twist geometry message.
     void command_message_callback(geometry_msgs::Twist::ConstPtr twist);
+
 private:
-    std::shared_ptr<HexapodModel> hexapod_model_ptr_;
+    std::unique_ptr<HexapodModel> hexapod_model_;
     geometry_msgs::Twist twist_;
 
-    // Topic name.
+    // Topic names.
     const std::string twist_command_topic_name_{"cmd_vel"};
+    const std::string joints_command_topic_name_{"joints_command"};
+
+    // Publisher.
+    ros::Publisher joints_command_pub_;
 
     // Subscriber.
     ros::Subscriber twist_command_sub_;
 
     ros::NodeHandle nh_{"~"};
+
+    /// Publishes the joint status to the joints_command topic.
+    void publish_joints();
 };
 
 

@@ -21,27 +21,13 @@ int main(int argc, char **argv)
     ROS_INFO("Publishing at %fHz on %s.", publish_rate_in_hz, node_name.c_str());
     ros::Rate loop_rate(publish_rate_in_hz);
 
-    // Configure hexapod model and controller
-    std::shared_ptr<HexapodModel> hexapod_model_ptr = std::make_shared<HexapodModel>();
-    HexapodController hexapod_controller{hexapod_model_ptr};
+    // Configure hexapod controller
+    HexapodController hexapod_controller{};
 
     // Rough steps
     // 2) Ros loop
     while (ros::ok()) {
-        HexapodModel::RobotState current_state = hexapod_model_ptr->get_current_robot_status();
-        HexapodModel::RobotState previous_state = hexapod_model_ptr->get_previous_robot_status();
-
-        if (previous_state == HexapodModel::RobotState::Inactive && current_state == HexapodModel::RobotState::Active) {
-            // Stand up.
-        }
-        else if (previous_state == HexapodModel::RobotState::Active && current_state == HexapodModel::RobotState::Active) {
-            // Walking.
-        }
-        else if (previous_state == HexapodModel::RobotState::Active && current_state == HexapodModel::RobotState::Inactive) {
-            // Sit down.
-        } else {
-            // Stay down.
-        }
+        hexapod_controller.state_transition();
         ros::spinOnce();
         loop_rate.sleep();
     }
