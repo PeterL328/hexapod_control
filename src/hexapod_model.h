@@ -43,8 +43,6 @@ private:
     RobotState previous_status_;
 
     hexapod_msgs::LegsJoints legs_joints_;
-
-    ros::NodeHandle nh_{"~"};
 };
 
 

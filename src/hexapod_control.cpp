@@ -24,8 +24,6 @@ int main(int argc, char **argv)
     // Configure hexapod controller
     HexapodController hexapod_controller{};
 
-    // Rough steps
-    // 2) Ros loop
     while (ros::ok()) {
         hexapod_controller.state_transition();
         ros::spinOnce();
