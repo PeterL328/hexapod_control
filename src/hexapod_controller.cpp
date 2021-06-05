@@ -2,10 +2,15 @@
 // Created by peter on 2021-05-31.
 //
 
+#include <ros/console.h>
+
 #include "hexapod_controller.h"
 
 
 HexapodController::HexapodController() {
+    // Setup the servo controller object
+    hexapod_model_ = std::make_unique<HexapodModel>();
+
     // Configure publisher.
     joints_command_pub_ = nh_.advertise<hexapod_msgs::LegsJoints>(joints_command_topic_name_, 1);
 
@@ -21,18 +26,23 @@ void HexapodController::state_transition() {
         // Stand up.
 
         // Update state.
+        ROS_INFO("Stand up");
+        // TODO: Change the state once we know we have completely standing up.
         hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Active);
     }
     else if (previous_state == HexapodModel::RobotState::Active && current_state == HexapodModel::RobotState::Active) {
         // Walking.
+        ROS_INFO("Walking");
     }
     else if (previous_state == HexapodModel::RobotState::Active && current_state == HexapodModel::RobotState::Inactive) {
         // Sit down.
 
         // Update state.
+        ROS_INFO("Sit down");
         hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Inactive);
     } else {
         stay_resting();
+        ROS_INFO("Stay resting");
     }
     publish_joints();
 }
