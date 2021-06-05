@@ -8,7 +8,7 @@
 
 
 HexapodController::HexapodController() {
-    // Setup the servo controller object
+    // Setup the hexapod model object
     hexapod_model_ = std::make_unique<HexapodModel>();
 
     // Configure publisher.
@@ -24,21 +24,24 @@ void HexapodController::state_transition() {
     HexapodModel::RobotState previous_state = hexapod_model_->get_previous_robot_status();
     if (previous_state == HexapodModel::RobotState::Inactive && current_state == HexapodModel::RobotState::Active) {
         // Stand up.
-
-        // Update state.
+        stand_up();
         ROS_INFO("Stand up");
+
         // TODO: Change the state once we know we have completely standing up.
+        // Update state.
         hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Active);
     }
     else if (previous_state == HexapodModel::RobotState::Active && current_state == HexapodModel::RobotState::Active) {
         // Walking.
+        walk();
         ROS_INFO("Walking");
     }
     else if (previous_state == HexapodModel::RobotState::Active && current_state == HexapodModel::RobotState::Inactive) {
         // Sit down.
+        sit_down();
+        ROS_INFO("Sit down");
 
         // Update state.
-        ROS_INFO("Sit down");
         hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Inactive);
     } else {
         stay_resting();
@@ -68,6 +71,18 @@ void HexapodController::state_message_callback(std_msgs::Bool::ConstPtr state) {
 
 void HexapodController::publish_joints() {
     joints_command_pub_.publish(hexapod_model_->get_legs_joints());
+}
+
+void HexapodController::stand_up() {
+
+}
+
+void HexapodController::walk() {
+
+}
+
+void HexapodController::sit_down() {
+
 }
 
 void HexapodController::stay_resting() {

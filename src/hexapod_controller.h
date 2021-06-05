@@ -51,6 +51,15 @@ private:
     /// Publishes the joint status to the joints_command topic.
     void publish_joints();
 
+    /// Commands the hexapod to stand up.
+    void stand_up();
+
+    /// Commands the hexapod to walk.
+    void walk();
+
+    /// Commands the hexapod to sit down.
+    void sit_down();
+
     /// Commands the hexapod to stay in the resting position.
     void stay_resting();
 };
