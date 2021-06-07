@@ -9,9 +9,11 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <hexapod_msgs/LegsJoints.h>
 #include <std_msgs/Bool.h>
 
 #include "hexapod_model.h"
+#include "kinematics.h"
 
 
 class HexapodController {
@@ -24,6 +26,7 @@ public:
 
 private:
     std::unique_ptr<HexapodModel> hexapod_model_;
+    std::unique_ptr<Kinematics> kinematics_;
     geometry_msgs::Twist twist_;
 
     // Topic names.
@@ -50,6 +53,9 @@ private:
 
     /// Publishes the joint status to the joints_command topic.
     void publish_joints();
+
+    /// Start the robot in its initialize position and orientation.
+    void initial_configuration();
 
     /// Commands the hexapod to stand up.
     void stand_up();

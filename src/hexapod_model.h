@@ -5,8 +5,9 @@
 #ifndef HEXAPOD_WS_HEXAPOD_MODEL_H
 #define HEXAPOD_WS_HEXAPOD_MODEL_H
 
-#include <ros/ros.h>
-#include <hexapod_msgs/LegsJoints.h>
+#include <hexapod_msgs/FeetPositions.h>
+#include <hexapod_msgs/Pose.h>
+
 
 class HexapodModel {
 public:
@@ -23,7 +24,7 @@ public:
     RobotState get_current_robot_status() const;
 
     /// Sets the current robot status.
-    /// \param state
+    /// \param state The current robot state.
     void set_current_robot_status(RobotState state);
 
     /// Gets the current robot status.
@@ -31,18 +32,47 @@ public:
     RobotState get_previous_robot_status() const;
 
     /// Sets the current robot status.
-    /// \param The previous robot state.
+    /// \param state The previous robot state.
     void set_previous_robot_status(RobotState state);
 
-    /// Gets the legs joints.
-    /// \return The legs joints message.
-    hexapod_msgs::LegsJoints get_legs_joints() const;
+    /// Gets the body pose.
+    /// \return The body Pose message.
+    hexapod_msgs::Pose get_body() const;
+
+    /// Sets the orientation of the body.
+    /// \param pitch
+    /// \param yaw
+    /// \param roll
+    void set_body_orientation(float pitch, float yaw, float roll);
+
+    /// Sets the position of the body.
+    /// \param x
+    /// \param y
+    /// \param z
+    void set_body_position(float x, float y, float z);
+
+    /// Sets only the height (z) of the body.
+    /// \param z
+    void set_body_z(float z);
+
+    /// Sets only the x of the body.
+    /// \param x
+    void set_body_x(float x);
+
+    /// Sets only the y of the body.
+    /// \param y
+    void set_body_y(float y);
+
+    /// Gets the feet positions.
+    /// \return The FeetPositions message.
+    hexapod_msgs::FeetPositions get_feet_positions() const;
 
 private:
     RobotState current_status_;
     RobotState previous_status_;
 
-    hexapod_msgs::LegsJoints legs_joints_;
+    hexapod_msgs::Pose body_;
+    hexapod_msgs::FeetPositions feet_positions_;
 };
 
 

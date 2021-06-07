@@ -143,6 +143,7 @@ add_executable(
     ${SRC_DIRS}/hexapod_control.cpp
     ${SRC_DIRS}/hexapod_controller.cpp
     ${SRC_DIRS}/hexapod_model.cpp
+    ${SRC_DIRS}/kinematics.cpp
 )
 
 add_executable(
