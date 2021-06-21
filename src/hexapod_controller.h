@@ -25,7 +25,7 @@ public:
     void state_transition();
 
 private:
-    std::unique_ptr<HexapodModel> hexapod_model_;
+    std::shared_ptr<HexapodModel> hexapod_model_;
     std::unique_ptr<Kinematics> kinematics_;
     geometry_msgs::Twist twist_;
 

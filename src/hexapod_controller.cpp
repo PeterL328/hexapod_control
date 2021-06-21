@@ -8,8 +8,8 @@
 
 HexapodController::HexapodController() {
     // Setup the hexapod model object
-    hexapod_model_ = std::make_unique<HexapodModel>();
-    kinematics_ = std::make_unique<Kinematics>();
+    hexapod_model_ = std::make_shared<HexapodModel>();
+    kinematics_ = std::make_unique<Kinematics>(hexapod_model_);
 
     // Configure publisher.
     joints_command_pub_ = nh_.advertise<hexapod_msgs::LegsJoints>(joints_command_topic_name_, 1);

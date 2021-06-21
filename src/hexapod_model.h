@@ -19,6 +19,10 @@ public:
     /// Creates an instance of a Hexapod Model object.
     explicit HexapodModel();
 
+    /// Resets to the default state of the robot.
+    /// \return The current robot state.
+    void reset();
+
     /// Gets the current robot status.
     /// \return The current robot state.
     RobotState get_current_robot_status() const;
@@ -67,12 +71,24 @@ public:
     /// \return The FeetPositions message.
     hexapod_msgs::FeetPositions get_feet_positions() const;
 
+    /// Sets the position for a foot.
+    /// \param leg_index The index of the foot according to ['LF', 'LM', 'LB', 'RF', 'RM', 'RB']
+    /// \param x
+    /// \param y
+    /// \param z
+    void set_foot_position(int leg_index, float x, float y, float z);
+
 private:
     RobotState current_status_;
     RobotState previous_status_;
 
     hexapod_msgs::Pose body_;
     hexapod_msgs::FeetPositions feet_positions_;
+
+    // Loads from parameter server
+    std::vector<double> center_to_coxa_x, center_to_coxa_y;
+    std::vector<double> initial_center_to_feet_x, initial_center_to_feet_y, initial_center_to_feet_z;
+    double coxa_length, femur_length, tibia_length;
 };
 
 
