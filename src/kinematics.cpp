@@ -10,5 +10,8 @@ Kinematics::Kinematics(std::shared_ptr<HexapodModel> model) {
 
 hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints(hexapod_msgs::Pose body, hexapod_msgs::FeetPositions feet_positions) {
     hexapod_msgs::LegsJoints msg;
+    for (int i = 0; i < feet_positions.foot.size(); i++) {
+        // TODO: Fill in details
+    }
     return msg;
 }

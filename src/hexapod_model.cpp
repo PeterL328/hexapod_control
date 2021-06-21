@@ -85,7 +85,7 @@ hexapod_msgs::FeetPositions HexapodModel::get_feet_positions() const {
 }
 
 void HexapodModel::set_foot_position(int leg_index, float x, float y, float z) {
-    if (leg_index >= 6) {
+    if (leg_index >= feet_positions_.foot.size()) {
         throw std::invalid_argument("Leg index %d is invalid." + std::to_string(leg_index));
     }
     feet_positions_.foot[leg_index].x = x;
