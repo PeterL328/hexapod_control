@@ -6,10 +6,8 @@
 
 #include "hexapod_model.h"
 
-HexapodModel::HexapodModel() {
-    // Read from parameter server to populate values.
-    current_status_ = HexapodModel::RobotState::Inactive;
-    previous_status_ = HexapodModel::RobotState::Inactive;
+HexapodModel::HexapodModel()
+    : current_status_(HexapodModel::RobotState::Inactive), previous_status_(HexapodModel::RobotState::Inactive){
 
     // Load from parameter server.
     ros::param::get("CENTER_TO_COXA_X", center_to_coxa_x);

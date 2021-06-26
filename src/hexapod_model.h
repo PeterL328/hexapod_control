@@ -8,7 +8,6 @@
 #include <hexapod_msgs/FeetPositions.h>
 #include <hexapod_msgs/Pose.h>
 
-
 class HexapodModel {
 public:
     enum class RobotState {

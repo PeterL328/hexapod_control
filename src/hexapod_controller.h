@@ -15,7 +15,6 @@
 #include "hexapod_model.h"
 #include "kinematics.h"
 
-
 class HexapodController {
 public:
     /// Creates an instance of a Hexapod Controller object.
