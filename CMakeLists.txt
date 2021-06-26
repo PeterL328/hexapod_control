@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
 )
 
+find_package(Eigen3 REQUIRED)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -103,10 +105,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES hexapod_control
-#  CATKIN_DEPENDS hexapod_msgs roscpp std_msgs
-#  DEPENDS system_lib
+#    INCLUDE_DIRS include
+#    LIBRARIES hexapod_control
+#    CATKIN_DEPENDS hexapod_msgs roscpp std_msgs
+#    DEPENDS
 )
 
 ###########
@@ -118,9 +120,11 @@ set(SRC_DIRS src)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+set(Eigen3_INCLUDE_DIRS "/usr/include/eigen3")
+
 include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
+    ${Eigen3_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -167,7 +171,7 @@ add_dependencies(hexapod_control hexapod_msgs_generate_messages_cpp)
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries(hexapod_control ${catkin_LIBRARIES})
+target_link_libraries(hexapod_control ${catkin_LIBRARIES} ${Eigen3_LIBRARIES})
 target_link_libraries(test_joints ${catkin_LIBRARIES})
 
 #############
