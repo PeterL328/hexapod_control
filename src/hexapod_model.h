@@ -5,6 +5,8 @@
 #ifndef HEXAPOD_WS_HEXAPOD_MODEL_H
 #define HEXAPOD_WS_HEXAPOD_MODEL_H
 
+#include <Eigen/Dense>
+
 #include <hexapod_msgs/FeetPositions.h>
 #include <hexapod_msgs/Pose.h>
 
@@ -77,6 +79,23 @@ public:
     /// \param z
     void set_foot_position(int leg_index, float x, float y, float z);
 
+    /// Gets the vector (x, y, z) from the origin of the body to a particular coxa point (hip joint).
+    /// \param leg_index The index of the foot according to ['LF', 'LM', 'LB', 'RF', 'RM', 'RB']
+    /// \return The vector (x, y, z).
+    Eigen::Vector3f get_center_to_coxa(int leg_index);
+
+    /// Gets the length of the coxa.
+    /// \return The length of the coxa.
+    float get_coxa_length();
+
+    /// Gets the length of the femur.
+    /// \return The length of the femur.
+    float get_femur_length();
+
+    /// Gets the length of the tibia.
+    /// \return The length of the tibia.
+    float get_tibia_length();
+
 private:
     RobotState current_status_;
     RobotState previous_status_;
@@ -85,9 +104,10 @@ private:
     hexapod_msgs::FeetPositions feet_positions_;
 
     // Loads from parameter server
-    std::vector<double> center_to_coxa_x, center_to_coxa_y;
-    std::vector<double> initial_center_to_feet_x, initial_center_to_feet_y, initial_center_to_feet_z;
-    double coxa_length, femur_length, tibia_length;
+    std::vector<float> center_to_coxa_x_, center_to_coxa_y_;
+    std::vector<float> initial_center_to_feet_x_, initial_center_to_feet_y_, initial_center_to_feet_z_;
+    float coxa_length_, femur_length_, tibia_length_;
+    float standing_height_;
 };
 
 

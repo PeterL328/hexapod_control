@@ -6,20 +6,24 @@
 
 #include "hexapod_model.h"
 
+using namespace Eigen;
+
 HexapodModel::HexapodModel()
     : current_status_(HexapodModel::RobotState::Inactive), previous_status_(HexapodModel::RobotState::Inactive){
 
     // Load from parameter server.
-    ros::param::get("CENTER_TO_COXA_X", center_to_coxa_x);
-    ros::param::get("CENTER_TO_COXA_Y", center_to_coxa_y);
+    ros::param::get("CENTER_TO_COXA_X", center_to_coxa_x_);
+    ros::param::get("CENTER_TO_COXA_Y", center_to_coxa_y_);
 
-    ros::param::get("CENTER_TO_FEET_X", initial_center_to_feet_x);
-    ros::param::get("CENTER_TO_FEET_Y", initial_center_to_feet_y);
-    ros::param::get("CENTER_TO_FEET_Z", initial_center_to_feet_z);
+    ros::param::get("CENTER_TO_FEET_X", initial_center_to_feet_x_);
+    ros::param::get("CENTER_TO_FEET_Y", initial_center_to_feet_y_);
+    ros::param::get("CENTER_TO_FEET_Z", initial_center_to_feet_z_);
 
-    ros::param::get("COXA_LENGTH", coxa_length);
-    ros::param::get("FEMUR_LENGTH", femur_length);
-    ros::param::get("TIBIA_LENGTH", tibia_length);
+    ros::param::get("COXA_LENGTH", coxa_length_);
+    ros::param::get("FEMUR_LENGTH", femur_length_);
+    ros::param::get("TIBIA_LENGTH", tibia_length_);
+
+    ros::param::get("STANDING_BODY_HEIGHT", standing_height_);
 
     // Start in default state.
     reset();
@@ -28,7 +32,7 @@ HexapodModel::HexapodModel()
 void HexapodModel::reset() {
     // Set initial foot position.
     for (int i = 0; i < 6; i++) {
-        set_foot_position(i, initial_center_to_feet_x[i], initial_center_to_feet_y[i], initial_center_to_feet_z[i]);
+        set_foot_position(i, initial_center_to_feet_x_[i], initial_center_to_feet_y_[i], initial_center_to_feet_z_[i]);
     }
     set_body_position(0, 0 ,0);
     set_body_orientation(0, 0 ,0);
@@ -89,4 +93,20 @@ void HexapodModel::set_foot_position(int leg_index, float x, float y, float z) {
     feet_positions_.foot[leg_index].x = x;
     feet_positions_.foot[leg_index].y = y;
     feet_positions_.foot[leg_index].z = z;
+}
+
+Vector3f HexapodModel::get_center_to_coxa(int leg_index) {
+    return Vector3f(center_to_coxa_x_[leg_index], center_to_coxa_y_[leg_index], 0.f);
+}
+
+float HexapodModel::get_coxa_length() {
+    return coxa_length_;
+}
+
+float HexapodModel::get_femur_length() {
+    return femur_length_;
+}
+
+float HexapodModel::get_tibia_length() {
+    return tibia_length_;
 }
