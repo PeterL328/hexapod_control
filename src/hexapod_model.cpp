@@ -74,6 +74,10 @@ void HexapodModel::set_body_z(float z) {
     body_.position.z = z;
 }
 
+float HexapodModel::get_body_z() {
+    return body_.position.z;
+}
+
 void HexapodModel::set_body_x(float x) {
     body_.position.x = x;
 }
@@ -109,4 +113,8 @@ float HexapodModel::get_femur_length() {
 
 float HexapodModel::get_tibia_length() {
     return tibia_length_;
+}
+
+float HexapodModel::get_standing_height() {
+    return standing_height_;
 }

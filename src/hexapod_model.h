@@ -60,6 +60,10 @@ public:
     /// \param z
     void set_body_z(float z);
 
+    /// Gets the height (z) of the body.
+    /// \return The current height of the body.
+    float get_body_z();
+
     /// Sets only the x of the body.
     /// \param x
     void set_body_x(float x);
@@ -95,6 +99,10 @@ public:
     /// Gets the length of the tibia.
     /// \return The length of the tibia.
     float get_tibia_length();
+
+    /// Gets the height of the body while standing.
+    /// \return The height of the body.
+    float get_standing_height();
 
 private:
     RobotState current_status_;

@@ -53,9 +53,6 @@ private:
     /// Publishes the joint status to the joints_command topic.
     void publish_joints();
 
-    /// Start the robot in its initialize position and orientation.
-    void initial_configuration();
-
     /// Commands the hexapod to stand up.
     void stand_up();
 

@@ -3,6 +3,7 @@
 //
 
 #include <ros/console.h>
+#include <cmath>
 
 #include "hexapod_controller.h"
 
@@ -70,20 +71,16 @@ void HexapodController::publish_joints() {
     joints_command_pub_.publish(legs_joints);
 }
 
-void HexapodController::initial_configuration() {
-    // TODO: Robot go to the initial configuration
-}
-
 void HexapodController::stand_up() {
-    // Have the robot go to its initialize position and orientation.
-    // Robot should already be in the initial configuration after sitting down but ensures the first time
-    // standing up that the robot is in the initial configuration.
-    initial_configuration();
     ROS_INFO("Stand up");
-
-    // TODO: Change the state once we know we have completed standing up.
-    // Update state.
-    hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Active);
+    float current_height = hexapod_model_->get_body_z();
+    float target_height = hexapod_model_->get_standing_height();
+    if (current_height < target_height) {
+        hexapod_model_->set_body_z(std::min(target_height, current_height + 0.01f));
+        if (std::abs(hexapod_model_->get_body_z() - target_height) <= 0.001f) {
+            hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Active);
+        }
+    }
 }
 
 void HexapodController::walk() {
@@ -92,9 +89,14 @@ void HexapodController::walk() {
 
 void HexapodController::sit_down() {
     ROS_INFO("Sit down");
-
-    // Update state.
-    hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Inactive);
+    float current_height = hexapod_model_->get_body_z();
+    float target_height = hexapod_model_->get_standing_height();
+    if (current_height > 0.f) {
+        hexapod_model_->set_body_z(std::max(0.f, current_height - 0.01f));
+        if (std::abs(hexapod_model_->get_body_z() - target_height) <= 0.001f) {
+            hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Inactive);
+        }
+    }
 }
 
 void HexapodController::stay_resting() {
