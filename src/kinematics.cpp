@@ -25,8 +25,12 @@ hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints(hexapod_msg
     Vector3f global_origin_to_body_origin(body.position.x, body.position.y, body.position.z);
     Matrix3f body_rot_mat = euler_angles_to_rotation_matrix(body.orientation.roll, body.orientation.yaw, body.orientation.pitch);
 
+    // Useful constants
+    float coxa_angle_offset_rad = 0.9442231f; // 54.1 degrees
+
     // Index in the following order: ['LF', 'LM', 'LB', 'RF', 'RM', 'RB']
     for (int i = 0; i < feet_positions.foot.size(); i++) {
+        // TODO: Check if feet position is reachable.
         Vector3f body_origin_to_coxa_joint_in_local = hexapod_model_->get_center_to_coxa(i);
         Vector3f global_origin_to_feet_ground_contact_point(feet_positions.foot[i].x, feet_positions.foot[i].y, feet_positions.foot[i].z);
 
@@ -47,9 +51,10 @@ hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints(hexapod_msg
         float femur_angle_rad = acos((pow(femur_length, 2) + feet_ground_contact_point_to_femur.squaredNorm() - pow(tibia_length, 2)) / (2.f * femur_length * feet_ground_contact_point_to_femur.norm())) - (rho_angle + phi_angle);
         float tibia_angle_rad = M_PI_2 - acos((pow(femur_length, 2) - feet_ground_contact_point_to_femur.squaredNorm() + pow(tibia_length, 2)) / (2.f * femur_length * tibia_length));
 
+
         switch (i) {
             case 0:
-                msg.left_front_leg.coxa = coxa_angle_rad;
+                msg.left_front_leg.coxa = coxa_angle_rad + coxa_angle_offset_rad;
                 msg.left_front_leg.femur = femur_angle_rad;
                 msg.left_front_leg.tibia = tibia_angle_rad;
                 break;
@@ -59,12 +64,12 @@ hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints(hexapod_msg
                 msg.left_mid_leg.tibia = tibia_angle_rad;
                 break;
             case 2:
-                msg.left_back_leg.coxa = coxa_angle_rad;
+                msg.left_back_leg.coxa = coxa_angle_rad - coxa_angle_offset_rad;
                 msg.left_back_leg.femur = femur_angle_rad;
                 msg.left_back_leg.tibia = tibia_angle_rad;
                 break;
             case 3:
-                msg.right_front_leg.coxa = coxa_angle_rad;
+                msg.right_front_leg.coxa = coxa_angle_rad - coxa_angle_offset_rad;
                 msg.right_front_leg.femur = femur_angle_rad;
                 msg.right_front_leg.tibia = tibia_angle_rad;
                 break;
@@ -74,7 +79,7 @@ hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints(hexapod_msg
                 msg.right_mid_leg.tibia = tibia_angle_rad;
                 break;
             case 5:
-                msg.right_back_leg.coxa = coxa_angle_rad;
+                msg.right_back_leg.coxa = coxa_angle_rad + coxa_angle_offset_rad;
                 msg.right_back_leg.femur = femur_angle_rad;
                 msg.right_back_leg.tibia = tibia_angle_rad;
                 break;
