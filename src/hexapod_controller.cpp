@@ -74,10 +74,14 @@ void HexapodController::publish_joints() {
 void HexapodController::stand_up() {
     ROS_INFO("Stand up");
     float current_height = hexapod_model_->get_body_z();
-    float target_height = hexapod_model_->get_standing_height();
-    if (current_height < target_height) {
-        hexapod_model_->set_body_z(std::min(target_height, current_height + 0.01f));
-        if (std::abs(hexapod_model_->get_body_z() - target_height) <= 0.001f) {
+    float target_standing_height = hexapod_model_->get_standing_height();
+
+    float height_increment_amount = 0.01f;
+    float error_allow_bound = 0.001f;
+
+    if (current_height < target_standing_height) {
+        hexapod_model_->set_body_z(std::min(target_standing_height, current_height + height_increment_amount));
+        if (std::abs(hexapod_model_->get_body_z() - target_standing_height) <= error_allow_bound) {
             hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Active);
         }
     }
@@ -90,10 +94,14 @@ void HexapodController::walk() {
 void HexapodController::sit_down() {
     ROS_INFO("Sit down");
     float current_height = hexapod_model_->get_body_z();
-    float target_height = hexapod_model_->get_standing_height();
-    if (current_height > 0.f) {
-        hexapod_model_->set_body_z(std::max(0.f, current_height - 0.01f));
-        if (std::abs(hexapod_model_->get_body_z() - target_height) <= 0.001f) {
+    float target_sitting_height = 0.f;
+
+    float height_decrement_amount = 0.01f;
+    float error_allow_bound = 0.001f;
+
+    if (current_height > target_sitting_height) {
+        hexapod_model_->set_body_z(std::max(target_sitting_height, current_height - height_decrement_amount));
+        if (std::abs(hexapod_model_->get_body_z() - target_sitting_height) <= error_allow_bound) {
             hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Inactive);
         }
     }
