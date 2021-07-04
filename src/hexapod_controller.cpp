@@ -76,8 +76,8 @@ void HexapodController::stand_up() {
     float current_height = hexapod_model_->get_body_z();
     float target_standing_height = hexapod_model_->get_standing_height();
 
-    float height_increment_amount = 0.01f;
-    float error_allow_bound = 0.001f;
+    float height_increment_amount = 0.002f;
+    float error_allow_bound = 0.0001f;
 
     if (current_height < target_standing_height) {
         hexapod_model_->set_body_z(std::min(target_standing_height, current_height + height_increment_amount));
@@ -94,10 +94,10 @@ void HexapodController::walk() {
 void HexapodController::sit_down() {
     ROS_INFO("Sit down");
     float current_height = hexapod_model_->get_body_z();
-    float target_sitting_height = 0.f;
+    float target_sitting_height = hexapod_model_->get_sitting_height();
 
-    float height_decrement_amount = 0.01f;
-    float error_allow_bound = 0.001f;
+    float height_decrement_amount = 0.002f;
+    float error_allow_bound = 0.0001f;
 
     if (current_height > target_sitting_height) {
         hexapod_model_->set_body_z(std::max(target_sitting_height, current_height - height_decrement_amount));

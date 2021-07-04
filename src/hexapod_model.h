@@ -104,6 +104,10 @@ public:
     /// \return The height of the body.
     float get_standing_height();
 
+    /// Gets the height of the body while sitting.
+    /// \return The height of the body.
+    float get_sitting_height();
+
 private:
     RobotState current_status_;
     RobotState previous_status_;
@@ -115,7 +119,7 @@ private:
     std::vector<float> center_to_coxa_x_, center_to_coxa_y_;
     std::vector<float> initial_center_to_feet_x_, initial_center_to_feet_y_, initial_center_to_feet_z_;
     float coxa_length_, femur_length_, tibia_length_;
-    float standing_height_;
+    float standing_height_, sitting_height_;
 };
 
 

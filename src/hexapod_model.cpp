@@ -24,6 +24,7 @@ HexapodModel::HexapodModel()
     ros::param::get("TIBIA_LENGTH", tibia_length_);
 
     ros::param::get("STANDING_BODY_HEIGHT", standing_height_);
+    ros::param::get("SITTING_BODY_HEIGHT", sitting_height_);
 
     // Start in default state.
     reset();
@@ -34,7 +35,7 @@ void HexapodModel::reset() {
     for (int i = 0; i < 6; i++) {
         set_foot_position(i, initial_center_to_feet_x_[i], initial_center_to_feet_y_[i], initial_center_to_feet_z_[i]);
     }
-    set_body_position(0, 0 ,0);
+    set_body_position(0, 0 ,sitting_height_);
     set_body_orientation(0, 0 ,0);
 };
 
@@ -117,4 +118,8 @@ float HexapodModel::get_tibia_length() {
 
 float HexapodModel::get_standing_height() {
     return standing_height_;
+}
+
+float HexapodModel::get_sitting_height() {
+    return sitting_height_;
 }
