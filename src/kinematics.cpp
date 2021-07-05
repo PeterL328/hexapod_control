@@ -51,7 +51,6 @@ hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints(hexapod_msg
         float femur_angle_rad = acos((pow(femur_length, 2) + feet_ground_contact_point_to_femur.squaredNorm() - pow(tibia_length, 2)) / (2.f * femur_length * feet_ground_contact_point_to_femur.norm())) - (rho_angle + phi_angle);
         float tibia_angle_rad = M_PI_2 - acos((pow(femur_length, 2) - feet_ground_contact_point_to_femur.squaredNorm() + pow(tibia_length, 2)) / (2.f * femur_length * tibia_length));
 
-
         switch (i) {
             case 0:
                 msg.left_front_leg.coxa = coxa_angle_rad + coxa_angle_offset_rad;

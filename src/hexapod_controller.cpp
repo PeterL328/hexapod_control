@@ -34,9 +34,8 @@ void HexapodController::state_transition() {
     else if (previous_state == HexapodModel::RobotState::Active && current_state == HexapodModel::RobotState::Inactive) {
         // Sit down.
         sit_down();
-    } else {
-        stay_resting();
     }
+
     publish_joints();
 }
 
@@ -105,8 +104,4 @@ void HexapodController::sit_down() {
             hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Inactive);
         }
     }
-}
-
-void HexapodController::stay_resting() {
-    ROS_INFO("Stay resting");
 }

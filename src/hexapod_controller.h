@@ -61,9 +61,6 @@ private:
 
     /// Commands the hexapod to sit down.
     void sit_down();
-
-    /// Commands the hexapod to stay in the resting position.
-    void stay_resting();
 };
 
 
