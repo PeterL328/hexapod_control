@@ -51,7 +51,7 @@ void HexapodController::state_message_callback(std_msgs::Bool::ConstPtr state) {
     if (state->data == true) {
         if (current_state == HexapodModel::RobotState::Inactive) {
             hexapod_model_->set_body_orientation(0, 0, 0);
-            hexapod_model_->set_body_position(0, 0 ,0);
+            hexapod_model_->set_body_position(0, 0 , hexapod_model_->get_sitting_height());
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Active);
         }
     } else {
