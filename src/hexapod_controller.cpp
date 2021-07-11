@@ -95,7 +95,6 @@ void HexapodController::stand_up() {
 }
 
 void HexapodController::walk() {
-    ROS_INFO("Walking");
 }
 
 void HexapodController::sit_down() {
