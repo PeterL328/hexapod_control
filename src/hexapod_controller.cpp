@@ -23,15 +23,15 @@ HexapodController::HexapodController() {
 void HexapodController::state_transition() {
     HexapodModel::RobotState current_state = hexapod_model_->get_current_robot_status();
     HexapodModel::RobotState previous_state = hexapod_model_->get_previous_robot_status();
-    if (previous_state == HexapodModel::RobotState::Inactive && current_state == HexapodModel::RobotState::Active) {
+    if (previous_state == HexapodModel::RobotState::Off && current_state == HexapodModel::RobotState::Normal) {
         // Stand up.
         stand_up();
     }
-    else if (previous_state == HexapodModel::RobotState::Active && current_state == HexapodModel::RobotState::Active) {
+    else if (previous_state == HexapodModel::RobotState::Normal && current_state == HexapodModel::RobotState::Normal) {
         // Walking.
         walk();
     }
-    else if (previous_state == HexapodModel::RobotState::Active && current_state == HexapodModel::RobotState::Inactive) {
+    else if (previous_state == HexapodModel::RobotState::Normal && current_state == HexapodModel::RobotState::Off) {
         // Sit down.
         sit_down();
     }
@@ -45,28 +45,35 @@ void HexapodController::command_message_callback(geometry_msgs::Twist::ConstPtr 
     twist_.angular.z = twist->angular.z;
 }
 
-void HexapodController::state_message_callback(std_msgs::Bool::ConstPtr state) {
+void HexapodController::state_message_callback(std_msgs::String::ConstPtr state) {
+    // If in progress of a state transition then skip.
+    if (state_transitioning_) {
+        ROS_INFO("State still transitioning so ignoring new state.");
+        return;
+    }
     HexapodModel::RobotState current_state = hexapod_model_->get_current_robot_status();
-    if (state->data == true) {
-        if (current_state == HexapodModel::RobotState::Inactive) {
-            hexapod_model_->set_body_orientation(0, 0, 0);
-            hexapod_model_->set_body_position(0, 0 , hexapod_model_->get_sitting_height());
-            hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Active);
+    if (state->data == "Normal") {
+        hexapod_model_->set_body_orientation(0, 0, 0);
+        hexapod_model_->set_body_position(0, 0 , hexapod_model_->get_sitting_height());
+        if (current_state == HexapodModel::RobotState::Off) {
+            hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);
+            state_transitioning_ = true;
         }
-    } else {
-        if (current_state == HexapodModel::RobotState::Active) {
-            hexapod_model_->set_body_orientation(0, 0, 0);
-            hexapod_model_->set_body_x(0);
-            hexapod_model_->set_body_y(0);
-            hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Inactive);
+    } else if (state->data == "Off") {
+        hexapod_model_->set_body_orientation(0, 0, 0);
+        hexapod_model_->set_body_x(0);
+        hexapod_model_->set_body_y(0);
+        if (current_state == HexapodModel::RobotState::Normal) {
+            hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Off);
+            state_transitioning_ = true;
         }
     }
 }
 
 void HexapodController::publish_joints() {
     hexapod_msgs::LegsJoints legs_joints = kinematics_->body_feet_config_to_legs_joints(
-            hexapod_model_->get_body(),
-            hexapod_model_->get_feet_positions());
+        hexapod_model_->get_body(),
+        hexapod_model_->get_feet_positions());
     joints_command_pub_.publish(legs_joints);
 }
 
@@ -81,7 +88,8 @@ void HexapodController::stand_up() {
     if (current_height < target_standing_height) {
         hexapod_model_->set_body_z(std::min(target_standing_height, current_height + height_increment_amount));
         if (std::abs(hexapod_model_->get_body_z() - target_standing_height) <= error_allow_bound) {
-            hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Active);
+            hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Normal);
+            state_transitioning_ = false;
         }
     }
 }
@@ -101,7 +109,8 @@ void HexapodController::sit_down() {
     if (current_height > target_sitting_height) {
         hexapod_model_->set_body_z(std::max(target_sitting_height, current_height - height_decrement_amount));
         if (std::abs(hexapod_model_->get_body_z() - target_sitting_height) <= error_allow_bound) {
-            hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Inactive);
+            hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Off);
+            state_transitioning_ = false;
         }
     }
 }

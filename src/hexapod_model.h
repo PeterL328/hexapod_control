@@ -13,8 +13,9 @@
 class HexapodModel {
 public:
     enum class RobotState {
-        Active,
-        Inactive
+        Normal,
+        TranslateRotate,
+        Off
     };
 
     /// Creates an instance of a Hexapod Model object.

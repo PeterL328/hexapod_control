@@ -10,7 +10,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <hexapod_msgs/LegsJoints.h>
-#include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
 
 #include "hexapod_model.h"
 #include "kinematics.h"
@@ -27,6 +27,8 @@ private:
     std::shared_ptr<HexapodModel> hexapod_model_;
     std::unique_ptr<Kinematics> kinematics_;
     geometry_msgs::Twist twist_;
+    // Used so we can have atomic state transitions for actions spanning multiple "cycles".
+    bool state_transitioning_{false};
 
     // Topic names.
     const std::string joints_command_topic_name_{"joints_command"};
@@ -48,7 +50,7 @@ private:
 
     /// Callback function for twist messages.
     /// \param twist The twist geometry message.
-    void state_message_callback(std_msgs::Bool::ConstPtr state);
+    void state_message_callback(std_msgs::String::ConstPtr state);
 
     /// Publishes the joint status to the joints_command topic.
     void publish_joints();

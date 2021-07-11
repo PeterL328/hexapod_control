@@ -9,7 +9,7 @@
 using namespace Eigen;
 
 HexapodModel::HexapodModel()
-    : current_status_(HexapodModel::RobotState::Inactive), previous_status_(HexapodModel::RobotState::Inactive){
+    : current_status_(HexapodModel::RobotState::Off), previous_status_(HexapodModel::RobotState::Off){
 
     // Load from parameter server.
     ros::param::get("CENTER_TO_COXA_X", center_to_coxa_x_);
