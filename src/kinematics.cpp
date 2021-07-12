@@ -68,17 +68,17 @@ hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints(hexapod_msg
                 msg.left_back_leg.tibia = -tibia_angle_rad;
                 break;
             case 3:
-                msg.right_front_leg.coxa = coxa_angle_rad - coxa_angle_offset_rad;
+                msg.right_front_leg.coxa = -(coxa_angle_rad - coxa_angle_offset_rad);
                 msg.right_front_leg.femur = -femur_angle_rad;
                 msg.right_front_leg.tibia = -tibia_angle_rad;
                 break;
             case 4:
-                msg.right_mid_leg.coxa = coxa_angle_rad;
+                msg.right_mid_leg.coxa = -coxa_angle_rad;
                 msg.right_mid_leg.femur = -femur_angle_rad;
                 msg.right_mid_leg.tibia = -tibia_angle_rad;
                 break;
             case 5:
-                msg.right_back_leg.coxa = coxa_angle_rad + coxa_angle_offset_rad;
+                msg.right_back_leg.coxa = -(coxa_angle_rad + coxa_angle_offset_rad);
                 msg.right_back_leg.femur = -femur_angle_rad;
                 msg.right_back_leg.tibia = -tibia_angle_rad;
                 break;
