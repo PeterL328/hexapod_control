@@ -12,12 +12,31 @@ HexapodController::HexapodController() {
     hexapod_model_ = std::make_shared<HexapodModel>();
     kinematics_ = std::make_unique<Kinematics>(hexapod_model_);
 
+    // Set initial state
+    initial_twist_.linear.x = 0.f;
+    initial_twist_.linear.y = 0.f;
+    initial_twist_.linear.z = 0.f;
+    initial_twist_.angular.x = 0.f;
+    initial_twist_.angular.y = 0.f;
+    initial_twist_.angular.z = 0.f;
+
+    initial_translate_rotate_pose_.position.x = 0.f;
+    initial_translate_rotate_pose_.position.y = 0.f;
+    initial_translate_rotate_pose_.position.z = 0.f;
+    initial_translate_rotate_pose_.orientation.roll = 0.f;
+    initial_translate_rotate_pose_.orientation.yaw = 0.f;
+    initial_translate_rotate_pose_.orientation.pitch = 0.f;
+
+    reset_twist();
+    reset_translate_rotate();
+
     // Configure publisher.
     joints_command_pub_ = nh_.advertise<hexapod_msgs::LegsJoints>(joints_command_topic_name_, 1);
 
     // Configure subscribers.
-    twist_command_sub_ = nh_.subscribe(twist_command_topic_name_, 1, &HexapodController::command_message_callback, this);
-    state_command_sub_ = nh_.subscribe(state_command_topic_name_, 1, &HexapodController::state_message_callback, this);
+    twist_command_sub_ = nh_.subscribe(twist_command_topic_name_, 1, &HexapodController::twist_command_message_callback, this);
+    state_command_sub_ = nh_.subscribe(state_command_topic_name_, 1, &HexapodController::state_command_message_callback, this);
+    translate_rotate_command_sub_ = nh_.subscribe(translate_rotate_command_topic_name_, 1, &HexapodController::translate_rotate_command_message_callback, this);
 }
 
 void HexapodController::state_transition() {
@@ -31,21 +50,42 @@ void HexapodController::state_transition() {
         // Walking.
         walk();
     }
-    else if (previous_state == HexapodModel::RobotState::Normal && current_state == HexapodModel::RobotState::Off) {
+    else if (previous_state == HexapodModel::RobotState::TranslateRotate && current_state == HexapodModel::RobotState::TranslateRotate) {
+        translate_rotate();
+    }
+    else if ((previous_state == HexapodModel::RobotState::Normal || previous_state == HexapodModel::RobotState::TranslateRotate) && current_state == HexapodModel::RobotState::Off) {
         // Sit down.
         sit_down();
     }
+    else if (previous_state == HexapodModel::RobotState::Normal && current_state == HexapodModel::RobotState::TranslateRotate) {
+        hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::TranslateRotate);
+    }
+    else if (previous_state == HexapodModel::RobotState::TranslateRotate && current_state == HexapodModel::RobotState::Normal) {
+        hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Normal);
+    }
 
     publish_joints();
+
+    // Reset internal variables for storing commands.
+    reset_twist();
+    reset_translate_rotate();
 }
 
-void HexapodController::command_message_callback(geometry_msgs::Twist::ConstPtr twist) {
+void HexapodController::reset_twist() {
+    twist_ = initial_twist_;
+}
+
+void HexapodController::reset_translate_rotate() {
+    translate_rotate_pose_ = initial_translate_rotate_pose_;
+}
+
+void HexapodController::twist_command_message_callback(geometry_msgs::Twist::ConstPtr twist) {
     twist_.linear.x = twist->linear.x;
     twist_.linear.y = twist->linear.y;
     twist_.angular.z = twist->angular.z;
 }
 
-void HexapodController::state_message_callback(std_msgs::String::ConstPtr state) {
+void HexapodController::state_command_message_callback(std_msgs::String::ConstPtr state) {
     // If in progress of a state transition then skip.
     if (state_transitioning_) {
         ROS_INFO("State still transitioning so ignoring new state.");
@@ -59,15 +99,35 @@ void HexapodController::state_message_callback(std_msgs::String::ConstPtr state)
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);
             state_transitioning_ = true;
         }
+        else if (current_state == HexapodModel::RobotState::TranslateRotate) {
+            hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);
+        }
     } else if (state->data == "Off") {
         hexapod_model_->set_body_orientation(0, 0, 0);
         hexapod_model_->set_body_x(0);
         hexapod_model_->set_body_y(0);
+        hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Off);
+        state_transitioning_ = true;
+    } else if (state->data == "TranslateRotate") {
+        hexapod_model_->set_body_orientation(0, 0, 0);
+        hexapod_model_->set_body_x(0);
+        hexapod_model_->set_body_y(0);
         if (current_state == HexapodModel::RobotState::Normal) {
-            hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Off);
-            state_transitioning_ = true;
+            hexapod_model_->set_current_robot_status(HexapodModel::RobotState::TranslateRotate);
         }
+    } else {
+        ROS_ERROR("%s is not a valid state.", state->data.c_str());
     }
+}
+
+void HexapodController::translate_rotate_command_message_callback(hexapod_msgs::Pose::ConstPtr pose) {
+    translate_rotate_pose_.position.x = pose->position.x;
+    translate_rotate_pose_.position.y = pose->position.y;
+    translate_rotate_pose_.position.z = 0.f;
+
+    translate_rotate_pose_.orientation.roll = pose->orientation.roll;
+    translate_rotate_pose_.orientation.yaw = pose->orientation.yaw;
+    translate_rotate_pose_.orientation.pitch = pose->orientation.pitch;
 }
 
 void HexapodController::publish_joints() {
@@ -112,4 +172,16 @@ void HexapodController::sit_down() {
             state_transitioning_ = false;
         }
     }
+}
+
+void HexapodController::translate_rotate() {
+    hexapod_msgs::Pose current_pose = hexapod_model_->get_body();
+    hexapod_model_->set_body_orientation(
+            current_pose.orientation.pitch + translate_rotate_pose_.orientation.pitch,
+            current_pose.orientation.yaw + translate_rotate_pose_.orientation.yaw,
+            current_pose.orientation.yaw + translate_rotate_pose_.orientation.yaw);
+    hexapod_model_->set_body_position(
+            current_pose.position.x + translate_rotate_pose_.position.x,
+            current_pose.position.y + translate_rotate_pose_.position.y,
+            current_pose.position.z);
 }
