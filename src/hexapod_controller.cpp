@@ -92,9 +92,10 @@ void HexapodController::state_command_message_callback(std_msgs::String::ConstPt
         return;
     }
     HexapodModel::RobotState current_state = hexapod_model_->get_current_robot_status();
+    hexapod_model_->set_body_orientation(0, 0, 0);
+    hexapod_model_->set_body_x(0);
+    hexapod_model_->set_body_y(0);
     if (state->data == "Normal") {
-        hexapod_model_->set_body_orientation(0, 0, 0);
-        hexapod_model_->set_body_position(0, 0 , hexapod_model_->get_sitting_height());
         if (current_state == HexapodModel::RobotState::Off) {
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);
             state_transitioning_ = true;
@@ -103,15 +104,9 @@ void HexapodController::state_command_message_callback(std_msgs::String::ConstPt
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);
         }
     } else if (state->data == "Off") {
-        hexapod_model_->set_body_orientation(0, 0, 0);
-        hexapod_model_->set_body_x(0);
-        hexapod_model_->set_body_y(0);
         hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Off);
         state_transitioning_ = true;
     } else if (state->data == "TranslateRotate") {
-        hexapod_model_->set_body_orientation(0, 0, 0);
-        hexapod_model_->set_body_x(0);
-        hexapod_model_->set_body_y(0);
         if (current_state == HexapodModel::RobotState::Normal) {
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::TranslateRotate);
         }
