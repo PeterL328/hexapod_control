@@ -67,8 +67,8 @@ void HexapodController::state_transition() {
     publish_joints();
 
     // Reset internal variables for storing commands.
-    reset_twist();
-    reset_translate_rotate();
+//    reset_twist();
+//    reset_translate_rotate();
 }
 
 void HexapodController::reset_twist() {
@@ -175,13 +175,12 @@ void HexapodController::sit_down() {
 }
 
 void HexapodController::translate_rotate() {
-    hexapod_msgs::Pose current_pose = hexapod_model_->get_body();
     hexapod_model_->set_body_orientation(
-            current_pose.orientation.pitch + translate_rotate_pose_.orientation.pitch,
-            current_pose.orientation.yaw + translate_rotate_pose_.orientation.yaw,
-            current_pose.orientation.yaw + translate_rotate_pose_.orientation.yaw);
+        translate_rotate_pose_.orientation.pitch,
+        translate_rotate_pose_.orientation.yaw,
+        translate_rotate_pose_.orientation.roll);
     hexapod_model_->set_body_position(
-            current_pose.position.x + translate_rotate_pose_.position.x,
-            current_pose.position.y + translate_rotate_pose_.position.y,
-            current_pose.position.z);
+        translate_rotate_pose_.position.x,
+        translate_rotate_pose_.position.y,
+        hexapod_model_->get_standing_height());
 }
