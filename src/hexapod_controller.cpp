@@ -56,19 +56,21 @@ void HexapodController::state_transition() {
     else if ((previous_state == HexapodModel::RobotState::Normal || previous_state == HexapodModel::RobotState::TranslateRotate) && current_state == HexapodModel::RobotState::Off) {
         // Sit down.
         sit_down();
+
+        // Reset
+        reset_twist();
+        reset_translate_rotate();
     }
     else if (previous_state == HexapodModel::RobotState::Normal && current_state == HexapodModel::RobotState::TranslateRotate) {
         hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::TranslateRotate);
+        reset_twist();
     }
     else if (previous_state == HexapodModel::RobotState::TranslateRotate && current_state == HexapodModel::RobotState::Normal) {
         hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Normal);
+        reset_translate_rotate();
     }
 
     publish_joints();
-
-    // Reset internal variables for storing commands.
-//    reset_twist();
-//    reset_translate_rotate();
 }
 
 void HexapodController::reset_twist() {
