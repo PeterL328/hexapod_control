@@ -31,8 +31,17 @@ private:
     geometry_msgs::Twist initial_twist_;
     hexapod_msgs::Pose translate_rotate_pose_;
     hexapod_msgs::Pose initial_translate_rotate_pose_;
+
     // Used so we can have atomic state transitions for actions spanning multiple "cycles".
     bool state_transitioning_{false};
+    float height_adjustment_amount_{0.002f};
+
+    // Loads from parameter server
+    float pitch_lower_bound_, pitch_upper_bound_;
+    float yaw_lower_bound_, yaw_upper_bound_;
+    float roll_lower_bound_, roll_upper_bound_;
+    float position_x_lower_bound_, position_x_upper_bound_;
+    float position_y_lower_bound_, position_y_upper_bound_;
 
     // Topic names.
     const std::string joints_command_topic_name_{"joints_command"};

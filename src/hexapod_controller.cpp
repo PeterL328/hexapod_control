@@ -12,6 +12,22 @@ HexapodController::HexapodController() {
     hexapod_model_ = std::make_shared<HexapodModel>();
     kinematics_ = std::make_unique<Kinematics>(hexapod_model_);
 
+    // Load from parameter server.
+    ros::param::get("PITCH_LOWER_BOUND", pitch_lower_bound_);
+    ros::param::get("PITCH_UPPER_BOUND", pitch_upper_bound_);
+
+    ros::param::get("YAW_LOWER_BOUND", yaw_lower_bound_);
+    ros::param::get("YAW_UPPER_BOUND", yaw_upper_bound_);
+
+    ros::param::get("ROLL_LOWER_BOUND", roll_lower_bound_);
+    ros::param::get("ROLL_UPPER_BOUND", roll_upper_bound_);
+
+    ros::param::get("POSITION_X_LOWER_BOUND", position_x_lower_bound_);
+    ros::param::get("POSITION_X_UPPER_BOUND", position_x_upper_bound_);
+
+    ros::param::get("POSITION_Y_LOWER_BOUND", position_y_lower_bound_);
+    ros::param::get("POSITION_Y_UPPER_BOUND", position_y_upper_bound_);
+
     // Set initial state
     initial_twist_.linear.x = 0.f;
     initial_twist_.linear.y = 0.f;
@@ -139,7 +155,7 @@ void HexapodController::stand_up() {
     float current_height = hexapod_model_->get_body_z();
     float target_standing_height = hexapod_model_->get_standing_height();
 
-    float height_increment_amount = 0.002f;
+    float height_increment_amount = height_adjustment_amount_;
     float error_allow_bound = 0.0001f;
 
     if (current_height < target_standing_height) {
@@ -159,7 +175,7 @@ void HexapodController::sit_down() {
     float current_height = hexapod_model_->get_body_z();
     float target_sitting_height = hexapod_model_->get_sitting_height();
 
-    float height_decrement_amount = 0.002f;
+    float height_decrement_amount = height_adjustment_amount_;
     float error_allow_bound = 0.0001f;
 
     if (current_height > target_sitting_height) {
@@ -172,12 +188,19 @@ void HexapodController::sit_down() {
 }
 
 void HexapodController::translate_rotate() {
+    // Crop the parameters to be between the bounds.
+    float pitch = std::max(pitch_lower_bound_, std::min(pitch_upper_bound_, static_cast<float>(translate_rotate_pose_.orientation.pitch)));
+    float yaw = std::max(yaw_lower_bound_, std::min(yaw_upper_bound_, static_cast<float>(translate_rotate_pose_.orientation.yaw)));
+    float roll = std::max(roll_lower_bound_, std::min(roll_upper_bound_, static_cast<float>(translate_rotate_pose_.orientation.roll)));
+    float position_x = std::max(position_x_lower_bound_, std::min(position_x_upper_bound_, static_cast<float>(translate_rotate_pose_.position.x)));
+    float position_y = std::max(position_y_lower_bound_, std::min(position_y_upper_bound_, static_cast<float>(translate_rotate_pose_.position.y)));
+
     hexapod_model_->set_body_orientation(
-        translate_rotate_pose_.orientation.pitch,
-        translate_rotate_pose_.orientation.yaw,
-        translate_rotate_pose_.orientation.roll);
+        pitch,
+        yaw,
+        roll);
     hexapod_model_->set_body_position(
-        translate_rotate_pose_.position.x,
-        translate_rotate_pose_.position.y,
+        position_x,
+        position_y,
         hexapod_model_->get_standing_height());
 }
