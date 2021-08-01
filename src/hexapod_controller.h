@@ -14,6 +14,7 @@
 #include <std_msgs/String.h>
 
 #include "hexapod_model.h"
+#include "gait.h"
 #include "kinematics.h"
 
 class HexapodController {
@@ -27,6 +28,7 @@ public:
 private:
     std::shared_ptr<HexapodModel> hexapod_model_;
     std::unique_ptr<Kinematics> kinematics_;
+    std::unique_ptr<Gait> gait_;
     geometry_msgs::Twist twist_;
     geometry_msgs::Twist initial_twist_;
     hexapod_msgs::Pose translate_rotate_pose_;

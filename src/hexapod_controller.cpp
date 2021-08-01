@@ -11,6 +11,7 @@ HexapodController::HexapodController() {
     // Setup the hexapod model object
     hexapod_model_ = std::make_shared<HexapodModel>();
     kinematics_ = std::make_unique<Kinematics>(hexapod_model_);
+    gait_ = std::make_unique<Gait>(hexapod_model_);
 
     // Load from parameter server.
     ros::param::get("PITCH_LOWER_BOUND", pitch_lower_bound_);
@@ -144,9 +145,7 @@ void HexapodController::translate_rotate_command_message_callback(hexapod_msgs::
 }
 
 void HexapodController::publish_joints() {
-    hexapod_msgs::LegsJoints legs_joints = kinematics_->body_feet_config_to_legs_joints(
-        hexapod_model_->get_body(),
-        hexapod_model_->get_feet_positions());
+    hexapod_msgs::LegsJoints legs_joints = kinematics_->body_feet_config_to_legs_joints();
     joints_command_pub_.publish(legs_joints);
 }
 
@@ -168,6 +167,7 @@ void HexapodController::stand_up() {
 }
 
 void HexapodController::walk() {
+    gait_->UpdateModel(twist_);
 }
 
 void HexapodController::sit_down() {
