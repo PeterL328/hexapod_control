@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(publish_rate_in_hz);
 
     // Configure hexapod controller
-    HexapodController hexapod_controller{};
+    HexapodController hexapod_controller{publish_rate_in_hz};
 
     while (ros::ok()) {
         hexapod_controller.state_transition();

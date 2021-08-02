@@ -83,8 +83,16 @@ void HexapodModel::set_body_x(float x) {
     body_.position.x = x;
 }
 
+float HexapodModel::get_body_x() {
+    return body_.position.x;
+}
+
 void HexapodModel::set_body_y(float y) {
     body_.position.y = y;
+}
+
+float HexapodModel::get_body_y() {
+    return body_.position.y;
 }
 
 hexapod_msgs::FeetPositions HexapodModel::get_feet_positions() const {

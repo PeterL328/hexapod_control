@@ -17,7 +17,8 @@ public:
 
     /// Creates an instance of a Gait object.
     /// \model body A shared pointer to the hexapod model.
-    explicit Gait(std::shared_ptr<HexapodModel> model);
+    /// \param publish_rate The publish rate of the controller.
+    explicit Gait(std::shared_ptr<HexapodModel> model, float publish_rate);
 
     /// Updates the current gait mode.
     /// \param new_mode The new gait mode.
@@ -30,6 +31,13 @@ public:
 private:
     Mode gait_mode_;
     std::shared_ptr<HexapodModel> hexapod_model_;
+    int period_cycle_length_{0};
+    int previous_period_cycle_length_{0};
+    int period_cycle_{0};
+    float publish_rate_;
+
+    // Loads from parameter server
+    float leg_walk_distance_;
 };
 
 

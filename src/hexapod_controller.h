@@ -20,7 +20,8 @@
 class HexapodController {
 public:
     /// Creates an instance of a Hexapod Controller object.
-    explicit HexapodController();
+    /// \param publish_rate The publish rate of the controller.
+    explicit HexapodController(float publish_rate);
 
     /// Updates the state of the model and executes the appropriate action.
     void state_transition();

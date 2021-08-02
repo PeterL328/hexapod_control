@@ -7,11 +7,11 @@
 
 #include "hexapod_controller.h"
 
-HexapodController::HexapodController() {
+HexapodController::HexapodController(float publish_rate) {
     // Setup the hexapod model object
     hexapod_model_ = std::make_shared<HexapodModel>();
     kinematics_ = std::make_unique<Kinematics>(hexapod_model_);
-    gait_ = std::make_unique<Gait>(hexapod_model_);
+    gait_ = std::make_unique<Gait>(hexapod_model_, publish_rate);
 
     // Load from parameter server.
     ros::param::get("PITCH_LOWER_BOUND", pitch_lower_bound_);

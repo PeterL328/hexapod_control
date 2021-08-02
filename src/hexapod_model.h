@@ -69,9 +69,17 @@ public:
     /// \param x
     void set_body_x(float x);
 
+    /// Gets the height (x) of the body.
+    /// \return The x of the body.
+    float get_body_x();
+
     /// Sets only the y of the body.
     /// \param y
     void set_body_y(float y);
+
+    /// Gets the height (y) of the body.
+    /// \return The y of the body.
+    float get_body_y();
 
     /// Gets the feet positions.
     /// \return The FeetPositions message.
