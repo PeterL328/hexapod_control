@@ -22,14 +22,15 @@ public:
 
     /// Updates the current gait mode.
     /// \param new_mode The new gait mode.
-    void UpdateGaitMode(Mode new_mode);
+    void update_gait_mode(Mode new_mode);
 
     /// Updates the body position and orientation and feet positions based on the twist command.
     /// \param twist The twist message.
-    void UpdateModel(geometry_msgs::Twist& twist);
+    void update_model(geometry_msgs::Twist& twist);
 
 private:
     Mode gait_mode_;
+    std::vector<int> gait_seq_;
     std::shared_ptr<HexapodModel> hexapod_model_;
     int period_cycle_length_{0};
     int previous_period_cycle_length_{0};
@@ -37,7 +38,10 @@ private:
     float publish_rate_;
 
     // Loads from parameter server
-    float leg_walk_distance_;
+    float leg_walk_distance_, leg_lift_height_;
+
+    /// Updates the gait sequence based on the gait mode.
+    void update_gait_seq();
 };
 
 

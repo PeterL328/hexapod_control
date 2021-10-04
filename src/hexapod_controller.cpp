@@ -167,7 +167,7 @@ void HexapodController::stand_up() {
 }
 
 void HexapodController::walk() {
-    gait_->UpdateModel(twist_);
+    gait_->update_model(twist_);
 }
 
 void HexapodController::sit_down() {
