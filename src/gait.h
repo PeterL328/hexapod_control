@@ -1,47 +1,44 @@
 //
-// Created by peter on 2021-07-31.
+// Created by peter on 2021-10-17.
 //
 
 #ifndef HEXAPOD_WS_GAIT_H
 #define HEXAPOD_WS_GAIT_H
 
-#include <geometry_msgs/Twist.h>
-
-#include "hexapod_model.h"
+#include <unordered_map>
+#include <vector>
 
 class Gait {
 public:
     enum class Mode {
-        Tripod
+        Tripod,
+        Ripple,
+        Wave
     };
 
     /// Creates an instance of a Gait object.
-    /// \model body A shared pointer to the hexapod model.
-    /// \param publish_rate The publish rate of the controller.
-    explicit Gait(std::shared_ptr<HexapodModel> model, float publish_rate);
+    /// \param initial_gait The initial gait mode.
+    explicit Gait(Mode initial_gait);
 
-    /// Updates the current gait mode.
+    /// Updates the current gait mode and resets the sequence index.
     /// \param new_mode The new gait mode.
     void update_gait_mode(Mode new_mode);
 
-    /// Updates the body position and orientation and feet positions based on the twist command.
-    /// \param twist The twist message.
-    void update_model(geometry_msgs::Twist& twist);
+    /// Gets the current gait sequence and next.
+    /// \return The current sequence.
+    std::vector<int> get_current_seq_and_next();
 
+    /// Gets the duty factor of the gait.
+    /// \return The duty factor.
+    float get_duty_factor();
 private:
-    Mode gait_mode_;
-    std::vector<int> gait_seq_;
-    std::shared_ptr<HexapodModel> hexapod_model_;
-    int period_cycle_length_{0};
-    int previous_period_cycle_length_{0};
-    int period_cycle_{0};
-    float publish_rate_;
+    Mode current_mode_;
+    int current_seq_idx_{0};
+    std::unordered_map<Mode, std::vector<std::vector<int>>> gait_sequence_mapping_;
+    std::unordered_map<Mode, float> duty_factor_mapping_;
 
-    // Loads from parameter server
-    float leg_walk_distance_, leg_lift_height_;
-
-    /// Updates the gait sequence based on the gait mode.
-    void update_gait_seq();
+    /// Configures the gait sequencing and duty factor mapping.
+    void configure_mapping();
 };
 
 
