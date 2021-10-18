@@ -42,12 +42,11 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     // This cycle is not the same as the gait cycle.
     period_cycle_length_ = distance_per_cycle / (linear_speed_magnitude / publish_rate_);
 
-    // TODO: Should this be rounded like this?
-//    if (previous_period_cycle_length_ != 0) {
-//        period_cycle_ = (static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_;
-//    }
+    if (previous_period_cycle_length_ != 0) {
+        period_cycle_ = round((static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_);
+    }
 
-    // Get the distances in x and y axis to move for one cycle (frame)
+    // Get the distances in x and y-axis to move for one cycle (frame)
     float cycle_distance_meters_x = twist.linear.x / publish_rate_;
     float cycle_distance_meters_y = twist.linear.y / publish_rate_;
 
