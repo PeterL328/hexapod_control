@@ -8,7 +8,7 @@
 #include "hexapod_controller.h"
 
 HexapodController::HexapodController(float publish_rate) {
-    // Setup the hexapod model object
+    // Set up the hexapod model object
     hexapod_model_ = std::make_shared<HexapodModel>();
     kinematics_ = std::make_unique<Kinematics>(hexapod_model_);
     gait_planner_ = std::make_unique<GaitPlanner>(hexapod_model_, publish_rate);
@@ -73,18 +73,12 @@ void HexapodController::state_transition() {
     else if ((previous_state == HexapodModel::RobotState::Normal || previous_state == HexapodModel::RobotState::TranslateRotate) && current_state == HexapodModel::RobotState::Off) {
         // Sit down.
         sit_down();
-
-        // Reset
-        reset_twist();
-        reset_translate_rotate();
     }
     else if (previous_state == HexapodModel::RobotState::Normal && current_state == HexapodModel::RobotState::TranslateRotate) {
         hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::TranslateRotate);
-        reset_twist();
     }
     else if (previous_state == HexapodModel::RobotState::TranslateRotate && current_state == HexapodModel::RobotState::Normal) {
         hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Normal);
-        reset_translate_rotate();
     }
 
     publish_joints();
@@ -96,6 +90,14 @@ void HexapodController::reset_twist() {
 
 void HexapodController::reset_translate_rotate() {
     translate_rotate_pose_ = initial_translate_rotate_pose_;
+}
+
+void HexapodController::save_state() {
+    saved_body_pose = hexapod_model_->get_body();
+}
+
+void HexapodController::restore_state() {
+    hexapod_model_->set_body(saved_body_pose);
 }
 
 void HexapodController::twist_command_message_callback(geometry_msgs::Twist::ConstPtr twist) {
@@ -111,22 +113,30 @@ void HexapodController::state_command_message_callback(std_msgs::String::ConstPt
         return;
     }
     HexapodModel::RobotState current_state = hexapod_model_->get_current_robot_status();
-    hexapod_model_->set_body_orientation(0, 0, 0);
-    hexapod_model_->set_body_x(0);
-    hexapod_model_->set_body_y(0);
+
     if (state->data == "Normal") {
         if (current_state == HexapodModel::RobotState::Off) {
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);
             state_transitioning_ = true;
         }
         else if (current_state == HexapodModel::RobotState::TranslateRotate) {
+            restore_state();
+            reset_translate_rotate();
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);
         }
     } else if (state->data == "Off") {
+        if (current_state == HexapodModel::RobotState::TranslateRotate) {
+            restore_state();
+        }
+        // Reset
+        reset_twist();
+        reset_translate_rotate();
         hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Off);
         state_transitioning_ = true;
     } else if (state->data == "TranslateRotate") {
         if (current_state == HexapodModel::RobotState::Normal) {
+            save_state();
+            reset_twist();
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::TranslateRotate);
         }
     } else {
@@ -200,7 +210,7 @@ void HexapodController::translate_rotate() {
         yaw,
         roll);
     hexapod_model_->set_body_position(
-        position_x,
-        position_y,
+        saved_body_pose.position.x + position_x,
+        saved_body_pose.position.y + position_y,
         hexapod_model_->get_standing_height());
 }

@@ -45,6 +45,10 @@ public:
     /// \return The body Pose message.
     hexapod_msgs::Pose get_body() const;
 
+    /// Sets the body pose.
+    /// \param pose The new pose.
+    void set_body(hexapod_msgs::Pose pose);
+
     /// Sets the orientation of the body.
     /// \param pitch
     /// \param yaw

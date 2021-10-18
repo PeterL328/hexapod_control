@@ -34,6 +34,7 @@ private:
     geometry_msgs::Twist initial_twist_;
     hexapod_msgs::Pose translate_rotate_pose_;
     hexapod_msgs::Pose initial_translate_rotate_pose_;
+    hexapod_msgs::Pose saved_body_pose;
 
     // Used so we can have atomic state transitions for actions spanning multiple "cycles".
     bool state_transitioning_{false};
@@ -67,6 +68,12 @@ private:
 
     /// Resets the translate rotate.
     void reset_translate_rotate();
+
+    /// Saves the current hexapod body configuration.
+    void save_state();
+
+    /// Restores the hexapod body configuration.
+    void restore_state();
 
     /// Callback function for twist messages.
     /// \param twist The twist geometry message.

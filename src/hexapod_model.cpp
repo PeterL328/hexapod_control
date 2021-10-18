@@ -59,6 +59,17 @@ hexapod_msgs::Pose HexapodModel::get_body() const {
     return body_;
 }
 
+void HexapodModel::set_body(hexapod_msgs::Pose pose) {
+    set_body_orientation(
+        pose.orientation.pitch,
+        pose.orientation.yaw,
+        pose.orientation.roll);
+    set_body_position(
+        pose.position.x,
+        pose.position.y,
+        pose.position.z);
+}
+
 void HexapodModel::set_body_orientation(float pitch, float yaw, float roll) {
     body_.orientation.pitch = pitch;
     body_.orientation.yaw = yaw;
