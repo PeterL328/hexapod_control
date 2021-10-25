@@ -3,6 +3,7 @@
 //
 #include <stdexcept>
 #include <ros/ros.h>
+#include <Eigen/Geometry>
 
 #include "hexapod_model.h"
 
@@ -25,6 +26,12 @@ HexapodModel::HexapodModel()
 
     ros::param::get("STANDING_BODY_HEIGHT", standing_height_);
     ros::param::get("SITTING_BODY_HEIGHT", sitting_height_);
+
+    for (int i = 0; i < 6; i++) {
+        initial_feet_positions_.foot[i].x = initial_center_to_feet_x_[i];
+        initial_feet_positions_.foot[i].y = initial_center_to_feet_y_[i];
+        initial_feet_positions_.foot[i].z = initial_center_to_feet_z_[i];
+    }
 
     // Start in default state.
     reset();
@@ -86,7 +93,7 @@ void HexapodModel::set_body_z(float z) {
     body_.position.z = z;
 }
 
-float HexapodModel::get_body_z() {
+float HexapodModel::get_body_z() const {
     return body_.position.z;
 }
 
@@ -94,7 +101,7 @@ void HexapodModel::set_body_x(float x) {
     body_.position.x = x;
 }
 
-float HexapodModel::get_body_x() {
+float HexapodModel::get_body_x() const {
     return body_.position.x;
 }
 
@@ -102,12 +109,16 @@ void HexapodModel::set_body_y(float y) {
     body_.position.y = y;
 }
 
-float HexapodModel::get_body_y() {
+float HexapodModel::get_body_y() const {
     return body_.position.y;
 }
 
 hexapod_msgs::FeetPositions HexapodModel::get_feet_positions() const {
     return feet_positions_;
+}
+
+hexapod_msgs::FeetPositions HexapodModel::get_initial_feet_positions_in_body_frame() const {
+    return initial_feet_positions_;
 }
 
 void HexapodModel::set_foot_position(int leg_index, float x, float y, float z) {
@@ -119,27 +130,41 @@ void HexapodModel::set_foot_position(int leg_index, float x, float y, float z) {
     feet_positions_.foot[leg_index].z = z;
 }
 
-Vector3f HexapodModel::get_center_to_coxa(int leg_index) {
+void HexapodModel::set_foot_position_in_body_frame(int leg_index, float x, float y, float z) {
+    if (leg_index >= feet_positions_.foot.size()) {
+        throw std::invalid_argument("Leg index %d is invalid." + std::to_string(leg_index));
+    }
+    Vector3f foot_position_in_local(x, y, z);
+    Vector3f body_position_in_global(body_.position.x, body_.position.y, body_.position.z);
+    Matrix3f body_rot_mat = get_body_rot_mat();
+
+    Vector3f foot_position_in_global = body_position_in_global + body_rot_mat * foot_position_in_local;
+    feet_positions_.foot[leg_index].x = foot_position_in_global[0];
+    feet_positions_.foot[leg_index].y = foot_position_in_global[1];
+    feet_positions_.foot[leg_index].z = foot_position_in_global[2];
+}
+
+Vector3f HexapodModel::get_center_to_coxa(int leg_index) const {
     return Vector3f(center_to_coxa_x_[leg_index], center_to_coxa_y_[leg_index], 0.f);
 }
 
-float HexapodModel::get_coxa_length() {
+float HexapodModel::get_coxa_length() const {
     return coxa_length_;
 }
 
-float HexapodModel::get_femur_length() {
+float HexapodModel::get_femur_length() const {
     return femur_length_;
 }
 
-float HexapodModel::get_tibia_length() {
+float HexapodModel::get_tibia_length() const {
     return tibia_length_;
 }
 
-float HexapodModel::get_standing_height() {
+float HexapodModel::get_standing_height() const {
     return standing_height_;
 }
 
-float HexapodModel::get_sitting_height() {
+float HexapodModel::get_sitting_height() const {
     return sitting_height_;
 }
 
