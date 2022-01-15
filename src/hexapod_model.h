@@ -85,6 +85,12 @@ public:
     /// \return The y of the body.
     float get_body_y() const;
 
+    /// Moves the body in the local body frame.
+    /// \param x
+    /// \param y
+    /// \param z
+    void move_body_in_body_frame(float x, float y, float z);
+
     /// Gets the feet positions in global coordinates.
     /// \return The FeetPositions message.
     hexapod_msgs::FeetPositions get_feet_positions() const;

@@ -58,13 +58,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
     Vector3f cycle_distance_meters_global_frame = body_rot_mat * cycle_distance_meters_local_frame;
 
-
     // Move the body.
-    float new_body_position_x = hexapod_model_->get_body_x() + cycle_distance_meters_global_frame[0] * phase_time_ratio;
-    float new_body_position_y = hexapod_model_->get_body_y() + cycle_distance_meters_global_frame[1] * phase_time_ratio;
-
-    hexapod_model_->set_body_x(new_body_position_x);
-    hexapod_model_->set_body_y(new_body_position_y);
+    hexapod_model_->move_body_in_body_frame(cycle_distance_meters_global_frame[0] * phase_time_ratio, cycle_distance_meters_global_frame[1] * phase_time_ratio, 0);
 
     // Get current feet/legs positions
     hexapod_msgs::FeetPositions current_feet_positions = hexapod_model_->get_feet_positions();

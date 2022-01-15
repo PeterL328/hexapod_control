@@ -113,6 +113,17 @@ float HexapodModel::get_body_y() const {
     return body_.position.y;
 }
 
+void HexapodModel::move_body_in_body_frame(float x, float y, float z) {
+    Vector3f body_position_in_local(x, y, z);
+    Vector3f body_position_in_global(body_.position.x, body_.position.y, body_.position.z);
+    Matrix3f body_rot_mat = get_body_rot_mat();
+
+    Vector3f new_body_position_in_global = body_position_in_global + body_rot_mat * body_position_in_local;
+    body_.position.x = new_body_position_in_global[0];
+    body_.position.y = new_body_position_in_global[1];
+    body_.position.z = new_body_position_in_global[2];
+}
+
 hexapod_msgs::FeetPositions HexapodModel::get_feet_positions() const {
     return feet_positions_;
 }
