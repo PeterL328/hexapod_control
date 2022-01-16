@@ -19,7 +19,7 @@ GaitPlanner::GaitPlanner(std::shared_ptr<HexapodModel> model, float publish_rate
     // Initialize gait.
     gait_ = std::make_unique<Gait>(Gait::Mode::Tripod);
     gait_seq_ = gait_->get_current_seq_and_next();
-    legs_moved_ = std::vector<int>(gait_seq_.size(),0);
+    legs_moved_ = std::vector<int>(gait_seq_.size(), 0);
 }
 
 void GaitPlanner::update_gait_mode(Gait::Mode new_mode) {
@@ -72,8 +72,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         float new_z = default_feet_positions_in_body_frame.foot[i].z;
 
         if (gait_seq_[i] == 1 || legs_moved_[i] == 1) {
-            new_x += cycle_distance_meters_x * (1 - phase_time_ratio * (gait_->get_sequence_index() + 1));
-            new_y += cycle_distance_meters_y * (1 - phase_time_ratio * (gait_->get_sequence_index() + 1));
+            new_x += cycle_distance_meters_x * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1));
+            new_y += cycle_distance_meters_y * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1));
 
             new_z = leg_lift_height_ * (static_cast<float>(period_cycle_) / period_cycle_length_) - hexapod_model_->get_standing_height();
 
@@ -82,8 +82,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         } else {
             // If we are at the last index of a gait sequence, the x and y value can be the default feet value.
             if (gait_->get_sequence_index() != gait_->get_sequence_size() - 1) {
-                new_x -= cycle_distance_meters_x * phase_time_ratio * (gait_->get_sequence_index() + 1);
-                new_y -= cycle_distance_meters_y * phase_time_ratio * (gait_->get_sequence_index() + 1);
+                new_x -= cycle_distance_meters_x * phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1);
+                new_y -= cycle_distance_meters_y * phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1);
             }
             // Since we are working in the local frame, the feet contact point has negative z value.
             new_z = hexapod_model_->get_standing_height() * -1;
