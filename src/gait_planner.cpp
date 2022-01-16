@@ -71,7 +71,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         float new_y = default_feet_positions_in_body_frame.foot[i].y;
         float new_z = default_feet_positions_in_body_frame.foot[i].z;
 
-        if (gait_seq_[i] == 1 || legs_moved_[i] == 1) {
+        if (gait_seq_[i] == 1) {
             new_x += cycle_distance_meters_x * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1));
             new_y += cycle_distance_meters_y * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1));
 
@@ -79,7 +79,14 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
             // After we lift the leg and move it, mark it.
             legs_moved_[i] = 1;
-        } else {
+        }
+        else if (legs_moved_[i] == 1) {
+            new_x += cycle_distance_meters_x * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1));
+            new_y += cycle_distance_meters_y * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1));
+
+            new_z = hexapod_model_->get_standing_height() * -1;
+        }
+        else {
             // If we are at the last index of a gait sequence, the x and y value can be the default feet value.
             if (gait_->get_sequence_index() != gait_->get_sequence_size() - 1) {
                 new_x -= cycle_distance_meters_x * phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1);
@@ -88,6 +95,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
             // Since we are working in the local frame, the feet contact point has negative z value.
             new_z = hexapod_model_->get_standing_height() * -1;
         }
+
+        // ROS_INFO("Value: %f", cycle_distance_meters_x * phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1));
         hexapod_model_->set_foot_position_in_body_frame(i, new_x, new_y, new_z);
     }
 
