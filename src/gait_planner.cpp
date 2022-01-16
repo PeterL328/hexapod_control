@@ -83,7 +83,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
             // If we are at the last index of a gait sequence, the x and y value can be the default feet value.
             if (gait_->get_sequence_index() != gait_->get_sequence_size() - 1) {
                 new_x -= cycle_distance_meters_x * phase_time_ratio * (gait_->get_sequence_index() + 1);
-                new_y -= cycle_distance_meters_y * (1 - phase_time_ratio * (gait_->get_sequence_index() + 1));
+                new_y -= cycle_distance_meters_y * phase_time_ratio * (gait_->get_sequence_index() + 1);
             }
             // Since we are working in the local frame, the feet contact point has negative z value.
             new_z = hexapod_model_->get_standing_height() * -1;
