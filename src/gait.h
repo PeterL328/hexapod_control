@@ -31,6 +31,14 @@ public:
     /// Gets the duty factor of the gait.
     /// \return The duty factor.
     float get_duty_factor();
+
+    /// Gets the sequence size.
+    /// \return The sequence size.
+    int get_sequence_size();
+
+    /// Gets the sequence index.
+    /// \return The sequence index.
+    int get_sequence_index();
 private:
     Mode current_mode_;
     int current_seq_idx_{0};
