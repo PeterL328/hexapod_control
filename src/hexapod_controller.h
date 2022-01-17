@@ -11,6 +11,7 @@
 #include <geometry_msgs/Twist.h>
 #include <hexapod_msgs/Pose.h>
 #include <hexapod_msgs/LegsJoints.h>
+#include <hexapod_msgs/RPY.h>
 #include <std_msgs/String.h>
 
 #include "hexapod_model.h"

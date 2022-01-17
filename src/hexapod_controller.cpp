@@ -7,6 +7,8 @@
 
 #include "hexapod_controller.h"
 
+using namespace Eigen;
+
 HexapodController::HexapodController(float publish_rate) {
     // Set up the hexapod model object
     hexapod_model_ = std::make_shared<HexapodModel>();
@@ -204,13 +206,17 @@ void HexapodController::translate_rotate() {
     float roll = std::max(roll_lower_bound_, std::min(roll_upper_bound_, static_cast<float>(translate_rotate_pose_.orientation.roll)));
     float position_x = std::max(position_x_lower_bound_, std::min(position_x_upper_bound_, static_cast<float>(translate_rotate_pose_.position.x)));
     float position_y = std::max(position_y_lower_bound_, std::min(position_y_upper_bound_, static_cast<float>(translate_rotate_pose_.position.y)));
+    Vector3f position_local_frame(position_x, position_y, 0);
+
+    Matrix3f body_rot_mat = hexapod_model_->get_body_rot_mat();
+    Vector3f position_global_frame = body_rot_mat * position_local_frame;
 
     hexapod_model_->set_body_orientation(
-        pitch,
-        yaw,
-        roll);
+        saved_body_pose.orientation.pitch + pitch,
+        saved_body_pose.orientation.yaw + yaw,
+        saved_body_pose.orientation.roll + roll);
     hexapod_model_->set_body_position(
-        saved_body_pose.position.x + position_x,
-        saved_body_pose.position.y + position_y,
+        saved_body_pose.position.x + position_global_frame[0],
+        saved_body_pose.position.y + position_global_frame[1],
         hexapod_model_->get_standing_height());
 }
