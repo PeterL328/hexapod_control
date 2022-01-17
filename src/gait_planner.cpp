@@ -4,10 +4,13 @@
 
 #include <ros/ros.h>
 #include <cmath>
+#include <Eigen/Geometry>
 
 #include <hexapod_msgs/FeetPositions.h>
 
 #include "gait_planner.h"
+
+using namespace Eigen;
 
 GaitPlanner::GaitPlanner(std::shared_ptr<HexapodModel> model, float publish_rate) : hexapod_model_(model), publish_rate_(publish_rate){
     ros::param::get("GAIT_PERIOD_DISTANCE", gait_period_distance_);
@@ -47,13 +50,18 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     }
 
     // Get the distances in x and y-axis to move for one cycle (frame)
-    float cycle_distance_meters_x = twist.linear.x / publish_rate_;
-    float cycle_distance_meters_y = twist.linear.y / publish_rate_;
+    float cycle_distance_meters_local_frame_x = twist.linear.x / publish_rate_;
+    float cycle_distance_meters_local_frame_y = twist.linear.y / publish_rate_;
+
+    Vector3f cycle_distance_meters_local_frame(cycle_distance_meters_local_frame_x, cycle_distance_meters_local_frame_y, 0);
+    Matrix3f body_rot_mat = hexapod_model_->get_body_rot_mat();
+
+    Vector3f cycle_distance_meters_global_frame = body_rot_mat * cycle_distance_meters_local_frame;
+
 
     // Move the body.
-    // TODO: The displacement should be based on the current orientation of the body so we can move in body coordinate.
-    float new_body_position_x = hexapod_model_->get_body_x() + cycle_distance_meters_x * phase_time_ratio;
-    float new_body_position_y = hexapod_model_->get_body_y() + cycle_distance_meters_y * phase_time_ratio;
+    float new_body_position_x = hexapod_model_->get_body_x() + cycle_distance_meters_global_frame[0] * phase_time_ratio;
+    float new_body_position_y = hexapod_model_->get_body_y() + cycle_distance_meters_global_frame[1] * phase_time_ratio;
 
     hexapod_model_->set_body_x(new_body_position_x);
     hexapod_model_->set_body_y(new_body_position_y);
@@ -67,10 +75,9 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         float new_y = current_feet_positions.foot[i].y;
         float new_z = current_feet_positions.foot[i].z;
 
-        // TODO: The displacement should be based on the current orientation of the body so we can move in body coordinate.
         if (gait_seq_[i] == 1) {
-            new_x += cycle_distance_meters_x;
-            new_y += cycle_distance_meters_y;
+            new_x += cycle_distance_meters_global_frame[0];
+            new_y += cycle_distance_meters_global_frame[1];
             new_z = leg_lift_height_ * (static_cast<float>(period_cycle_) / period_cycle_length_);
         } else {
             new_z = 0;

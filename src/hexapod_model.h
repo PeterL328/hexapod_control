@@ -121,6 +121,10 @@ public:
     /// \return The height of the body.
     float get_sitting_height();
 
+    /// Gets the body rotation matrix.
+    /// \return The body rotation matrix.
+    Eigen::Matrix3f get_body_rot_mat() const;
+
 private:
     RobotState current_status_;
     RobotState previous_status_;
@@ -133,6 +137,8 @@ private:
     std::vector<float> initial_center_to_feet_x_, initial_center_to_feet_y_, initial_center_to_feet_z_;
     float coxa_length_, femur_length_, tibia_length_;
     float standing_height_, sitting_height_;
+
+    Eigen::Matrix3f euler_angles_to_rotation_matrix(float roll, float yaw, float pitch) const;
 };
 
 

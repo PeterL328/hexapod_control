@@ -142,3 +142,17 @@ float HexapodModel::get_standing_height() {
 float HexapodModel::get_sitting_height() {
     return sitting_height_;
 }
+
+Matrix3f HexapodModel::get_body_rot_mat() const {
+    return euler_angles_to_rotation_matrix(body_.orientation.roll, body_.orientation.yaw, body_.orientation.pitch);
+}
+
+Matrix3f HexapodModel::euler_angles_to_rotation_matrix(float roll, float yaw, float pitch) const {
+    AngleAxisf rollAngle(roll, Vector3f::UnitZ());
+    AngleAxisf yawAngle(yaw, Vector3f::UnitY());
+    AngleAxisf pitchAngle(pitch, Vector3f::UnitX());
+
+    Quaternion<float> q = rollAngle * yawAngle * pitchAngle;
+
+    return q.matrix();
+}

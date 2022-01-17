@@ -26,7 +26,7 @@ hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints() {
     float femur_length = hexapod_model_->get_femur_length();
     float tibia_length = hexapod_model_->get_tibia_length();
     Vector3f global_origin_to_body_origin(body.position.x, body.position.y, body.position.z);
-    Matrix3f body_rot_mat = euler_angles_to_rotation_matrix(body.orientation.roll, body.orientation.yaw, body.orientation.pitch);
+    Matrix3f body_rot_mat = hexapod_model_->get_body_rot_mat();
 
     // Useful constants
     float coxa_angle_offset_rad = 0.9442231f; // 54.1 degrees
@@ -88,14 +88,4 @@ hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints() {
         }
     }
     return msg;
-}
-
-Matrix3f Kinematics::euler_angles_to_rotation_matrix(float roll, float yaw, float pitch) {
-    AngleAxisf rollAngle(roll, Vector3f::UnitZ());
-    AngleAxisf yawAngle(yaw, Vector3f::UnitY());
-    AngleAxisf pitchAngle(pitch, Vector3f::UnitX());
-
-    Quaternion<float> q = rollAngle * yawAngle * pitchAngle;
-
-    return q.matrix();
 }
