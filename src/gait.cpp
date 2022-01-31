@@ -30,7 +30,10 @@ int Gait::get_sequence_size() {
 }
 
 int Gait::get_sequence_index() {
-    return current_seq_idx_;
+    if (current_seq_idx_ == 0) {
+        return gait_sequence_mapping_[current_mode_].size() - 1;
+    }
+    return current_seq_idx_ - 1;
 }
 
 void Gait::configure_mapping() {
