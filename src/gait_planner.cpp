@@ -67,48 +67,40 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
     hexapod_msgs::FeetPositions current_feet_positions = hexapod_model_->get_feet_positions();
 
-    ROS_INFO("******************************************");
-    ROS_INFO("Period: %d", period_cycle_);
-    ROS_INFO("Sequence id: %d", gait_->get_sequence_index());
+//    ROS_INFO("******************************************");
+//    ROS_INFO("Period: %d", period_cycle_);
+//    ROS_INFO("Sequence id: %d", gait_->get_sequence_index());
 
     // Move the legs.
     for (int i = 0; i < 6; i++) {
-        ROS_INFO("Leg: %d, x: %f, y: %f, z: %f", i, current_feet_positions.foot[i].x, current_feet_positions.foot[i].y, current_feet_positions.foot[i].z);
+        // ROS_INFO("Leg: %d, x: %f, y: %f, z: %f", i, current_feet_positions.foot[i].x, current_feet_positions.foot[i].y, current_feet_positions.foot[i].z);
         float new_x = default_feet_positions_in_body_frame.foot[i].x;
         float new_y = default_feet_positions_in_body_frame.foot[i].y;
         float new_z = default_feet_positions_in_body_frame.foot[i].z;
 
         if (gait_seq_[i] == 1) {
-            new_x += cycle_distance_meters_x * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1)) * (period_cycle_ + 1);
-            new_y += cycle_distance_meters_y * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1)) * (period_cycle_ + 1);
+            new_x += cycle_distance_meters_x * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
+            new_y += cycle_distance_meters_y * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
 
             new_z = leg_lift_height_ * (static_cast<float>(period_cycle_) / period_cycle_length_) - hexapod_model_->get_standing_height();
 
             // After we lift the leg and move it, mark it.
             legs_moved_[i] = 1;
-            ROS_INFO("Leg lifting and forward");
         }
         else if (legs_moved_[i] == 1) {
-            new_x += cycle_distance_meters_x * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1)) * (period_cycle_ + 1);
-            new_y += cycle_distance_meters_y * (1 - phase_time_ratio * (static_cast<float>(gait_->get_sequence_index()) + 1)) * (period_cycle_ + 1);
+            new_x += cycle_distance_meters_x * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
+            new_y += cycle_distance_meters_y * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
 
             new_z = hexapod_model_->get_standing_height() * -1;
-            ROS_INFO("Leg forward");
         }
         else {
-            // If we are at the last index of a gait sequence, the x and y value can be the default feet value.
-            new_x -= cycle_distance_meters_x * phase_time_ratio *
-                     (static_cast<float>(gait_->get_sequence_index()) + 1) * (period_cycle_ + 1);
-            new_y -= cycle_distance_meters_y * phase_time_ratio *
-                     (static_cast<float>(gait_->get_sequence_index()) + 1) * (period_cycle_ + 1);
+            new_x -= cycle_distance_meters_x * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
+            new_y -= cycle_distance_meters_y * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
 
-            ROS_INFO("Leg in back");
             // Since we are working in the local frame, the feet contact point has negative z value.
             new_z = hexapod_model_->get_standing_height() * -1;
         }
-        ROS_INFO("Leg: %d; Update pos: x: %f, y: %f, z: %f", i, new_x - default_feet_positions_in_body_frame.foot[i].x, new_y - default_feet_positions_in_body_frame.foot[i].y, new_z - default_feet_positions_in_body_frame.foot[i].z);
         hexapod_model_->set_foot_position_in_body_frame(i, new_x, new_y, new_z);
-        ROS_INFO("------");
     }
 
     period_cycle_++;
