@@ -67,13 +67,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
     hexapod_msgs::FeetPositions current_feet_positions = hexapod_model_->get_feet_positions();
 
-//    ROS_INFO("******************************************");
-//    ROS_INFO("Period: %d", period_cycle_);
-//    ROS_INFO("Sequence id: %d", gait_->get_sequence_index());
-
     // Move the legs.
     for (int i = 0; i < 6; i++) {
-        // ROS_INFO("Leg: %d, x: %f, y: %f, z: %f", i, current_feet_positions.foot[i].x, current_feet_positions.foot[i].y, current_feet_positions.foot[i].z);
         float new_x = default_feet_positions_in_body_frame.foot[i].x;
         float new_y = default_feet_positions_in_body_frame.foot[i].y;
         float new_z = default_feet_positions_in_body_frame.foot[i].z;
