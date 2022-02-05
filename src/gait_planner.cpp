@@ -59,8 +59,11 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
     Vector3f cycle_distance_meters_global_frame = body_rot_mat * cycle_distance_meters_local_frame;
 
+    float cycle_distance_meters_global_frame_x = cycle_distance_meters_global_frame[0];
+    float cycle_distance_meters_global_frame_y = cycle_distance_meters_global_frame[1];
+
     // Move the body.
-    hexapod_model_->move_body_in_body_frame(cycle_distance_meters_global_frame[0] * phase_time_ratio, cycle_distance_meters_global_frame[1] * phase_time_ratio, 0);
+    hexapod_model_->move_body_in_body_frame(cycle_distance_meters_global_frame_x * phase_time_ratio, cycle_distance_meters_global_frame_y * phase_time_ratio, 0);
 
     // Get current feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
@@ -72,8 +75,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         float new_z = default_feet_positions_in_body_frame.foot[i].z;
 
         if (gait_seq_[i] == 1) {
-            new_x += cycle_distance_meters_x * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
-            new_y += cycle_distance_meters_y * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
+            new_x += cycle_distance_meters_global_frame_x * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
+            new_y += cycle_distance_meters_global_frame_y * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
 
             new_z = leg_lift_height_ * (static_cast<float>(period_cycle_) / period_cycle_length_) - hexapod_model_->get_standing_height();
 
@@ -81,14 +84,14 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
             legs_moved_[i] = 1;
         }
         else if (legs_moved_[i] == 1) {
-            new_x += cycle_distance_meters_x * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
-            new_y += cycle_distance_meters_y * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
+            new_x += cycle_distance_meters_global_frame_x * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
+            new_y += cycle_distance_meters_global_frame_y * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
 
             new_z = hexapod_model_->get_standing_height() * -1;
         }
         else {
-            new_x -= cycle_distance_meters_x * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
-            new_y -= cycle_distance_meters_y * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
+            new_x -= cycle_distance_meters_global_frame_x * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
+            new_y -= cycle_distance_meters_global_frame_y * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
 
             // Since we are working in the local frame, the feet contact point has negative z value.
             new_z = hexapod_model_->get_standing_height() * -1;

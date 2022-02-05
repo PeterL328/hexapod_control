@@ -143,10 +143,6 @@ public:
     /// \return The body rotation matrix.
     Eigen::Matrix3f get_body_rot_mat() const;
 
-    /// Gets the body rotation matrix.
-    /// \return The body rotation matrix.
-    Eigen::Matrix3f get_body_rot_mat() const;
-
 private:
     RobotState current_status_;
     RobotState previous_status_;
