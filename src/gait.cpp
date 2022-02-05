@@ -25,6 +25,17 @@ float Gait::get_duty_factor() {
     return duty_factor_mapping_[current_mode_];
 }
 
+int Gait::get_sequence_size() {
+    return gait_sequence_mapping_[current_mode_].size();
+}
+
+int Gait::get_sequence_index() {
+    if (current_seq_idx_ == 0) {
+        return gait_sequence_mapping_[current_mode_].size() - 1;
+    }
+    return current_seq_idx_ - 1;
+}
+
 void Gait::configure_mapping() {
     // 1 means the ith leg is in transfer stage.
     // 0 means the ith leg is in support stage.

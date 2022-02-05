@@ -67,7 +67,7 @@ public:
 
     /// Gets the height (z) of the body.
     /// \return The current height of the body.
-    float get_body_z();
+    float get_body_z() const;
 
     /// Sets only the x of the body.
     /// \param x
@@ -75,7 +75,7 @@ public:
 
     /// Gets the height (x) of the body.
     /// \return The x of the body.
-    float get_body_x();
+    float get_body_x() const;
 
     /// Sets only the y of the body.
     /// \param y
@@ -83,43 +83,61 @@ public:
 
     /// Gets the height (y) of the body.
     /// \return The y of the body.
-    float get_body_y();
+    float get_body_y() const;
 
-    /// Gets the feet positions.
+    /// Moves the body in the local body frame.
+    /// \param x
+    /// \param y
+    /// \param z
+    void move_body_in_body_frame(float x, float y, float z);
+
+    /// Gets the feet positions in global coordinates.
     /// \return The FeetPositions message.
     hexapod_msgs::FeetPositions get_feet_positions() const;
 
-    /// Sets the position for a foot.
+    /// Gets the initial feet positions in the body frame coordinates
+    /// \return The FeetPositions message.
+    hexapod_msgs::FeetPositions get_initial_feet_positions_in_body_frame() const;
+
+    /// Sets the position for a foot in global coordinates.
     /// \param leg_index The index of the foot according to ['LF', 'LM', 'LB', 'RF', 'RM', 'RB']
     /// \param x
     /// \param y
     /// \param z
     void set_foot_position(int leg_index, float x, float y, float z);
 
+    /// Sets the position for a foot in body frame coordinates.
+    /// This method internally applies transformations to the feet positions which are expressed in the global frame.
+    /// \param leg_index The index of the foot according to ['LF', 'LM', 'LB', 'RF', 'RM', 'RB']
+    /// \param x
+    /// \param y
+    /// \param z
+    void set_foot_position_in_body_frame(int leg_index, float x, float y, float z);
+
     /// Gets the vector (x, y, z) from the origin of the body to a particular coxa point (hip joint).
     /// \param leg_index The index of the foot according to ['LF', 'LM', 'LB', 'RF', 'RM', 'RB']
     /// \return The vector (x, y, z).
-    Eigen::Vector3f get_center_to_coxa(int leg_index);
+    Eigen::Vector3f get_center_to_coxa(int leg_index) const;
 
     /// Gets the length of the coxa.
     /// \return The length of the coxa.
-    float get_coxa_length();
+    float get_coxa_length() const;
 
     /// Gets the length of the femur.
     /// \return The length of the femur.
-    float get_femur_length();
+    float get_femur_length() const;
 
     /// Gets the length of the tibia.
     /// \return The length of the tibia.
-    float get_tibia_length();
+    float get_tibia_length() const;
 
     /// Gets the height of the body while standing.
     /// \return The height of the body.
-    float get_standing_height();
+    float get_standing_height() const;
 
     /// Gets the height of the body while sitting.
     /// \return The height of the body.
-    float get_sitting_height();
+    float get_sitting_height() const;
 
     /// Gets the body rotation matrix.
     /// \return The body rotation matrix.
@@ -131,6 +149,7 @@ private:
 
     hexapod_msgs::Pose body_;
     hexapod_msgs::FeetPositions feet_positions_;
+    hexapod_msgs::FeetPositions initial_feet_positions_;
 
     // Loads from parameter server
     std::vector<float> center_to_coxa_x_, center_to_coxa_y_;

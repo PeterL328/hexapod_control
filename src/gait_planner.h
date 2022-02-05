@@ -30,6 +30,8 @@ private:
     std::shared_ptr<HexapodModel> hexapod_model_;
 
     std::vector<int> gait_seq_;
+    // Used for marking which leg has moved in a gait period.
+    std::vector<int> legs_moved_;
     int period_cycle_length_{0};
     int previous_period_cycle_length_{0};
     int period_cycle_{0};
