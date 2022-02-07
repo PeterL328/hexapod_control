@@ -76,6 +76,9 @@ private:
     /// Restores the hexapod body configuration.
     void restore_state();
 
+    /// Restores the legs to the default configuration.
+    void default_leg_state();
+
     /// Callback function for twist messages.
     /// \param twist The twist geometry message.
     void twist_command_message_callback(geometry_msgs::Twist::ConstPtr twist);

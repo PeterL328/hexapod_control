@@ -5,6 +5,8 @@
 #include <ros/console.h>
 #include <cmath>
 
+#include <hexapod_msgs/FeetPositions.h>
+
 #include "hexapod_controller.h"
 
 using namespace Eigen;
@@ -102,6 +104,17 @@ void HexapodController::restore_state() {
     hexapod_model_->set_body(saved_body_pose);
 }
 
+void HexapodController::default_leg_state() {
+    hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
+    for (int i = 0; i < 6; i++) {
+        hexapod_model_->set_foot_position_in_body_frame(
+            i,
+            default_feet_positions_in_body_frame.foot[i].x,
+            default_feet_positions_in_body_frame.foot[i].y,
+            hexapod_model_->get_standing_height() * -1);
+    }
+}
+
 void HexapodController::twist_command_message_callback(geometry_msgs::Twist::ConstPtr twist) {
     twist_.linear.x = twist->linear.x;
     twist_.linear.y = twist->linear.y;
@@ -117,26 +130,36 @@ void HexapodController::state_command_message_callback(std_msgs::String::ConstPt
     HexapodModel::RobotState current_state = hexapod_model_->get_current_robot_status();
 
     if (state->data == "Normal") {
+        ROS_INFO("Entering normal mode...");
         if (current_state == HexapodModel::RobotState::Off) {
+            ROS_INFO("Starting standing...");
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);
             state_transitioning_ = true;
         }
         else if (current_state == HexapodModel::RobotState::TranslateRotate) {
+            default_leg_state();
             restore_state();
             reset_translate_rotate();
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);
         }
     } else if (state->data == "Off") {
-        if (current_state == HexapodModel::RobotState::TranslateRotate) {
-            restore_state();
+        if (current_state == HexapodModel::RobotState::TranslateRotate || current_state == HexapodModel::RobotState::Normal) {
+            ROS_INFO("Starting sitting...");
+            if (current_state == HexapodModel::RobotState::TranslateRotate) {
+                restore_state();
+            }
+            // Reset
+            default_leg_state();
+            reset_twist();
+            reset_translate_rotate();
+            state_transitioning_ = true;
         }
-        // Reset
-        reset_twist();
-        reset_translate_rotate();
+
         hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Off);
-        state_transitioning_ = true;
     } else if (state->data == "TranslateRotate") {
         if (current_state == HexapodModel::RobotState::Normal) {
+            ROS_INFO("Entering TranslateRotate mode...");
+            default_leg_state();
             save_state();
             reset_twist();
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::TranslateRotate);
@@ -162,7 +185,6 @@ void HexapodController::publish_joints() {
 }
 
 void HexapodController::stand_up() {
-    ROS_INFO("Stand up");
     float current_height = hexapod_model_->get_body_z();
     float target_standing_height = hexapod_model_->get_standing_height();
 
@@ -174,6 +196,7 @@ void HexapodController::stand_up() {
         if (std::abs(hexapod_model_->get_body_z() - target_standing_height) <= error_allow_bound) {
             hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Normal);
             state_transitioning_ = false;
+            ROS_INFO("Ended standing.");
         }
     }
 }
@@ -183,7 +206,6 @@ void HexapodController::walk() {
 }
 
 void HexapodController::sit_down() {
-    ROS_INFO("Sit down");
     float current_height = hexapod_model_->get_body_z();
     float target_sitting_height = hexapod_model_->get_sitting_height();
 
@@ -195,6 +217,7 @@ void HexapodController::sit_down() {
         if (std::abs(hexapod_model_->get_body_z() - target_sitting_height) <= error_allow_bound) {
             hexapod_model_->set_previous_robot_status(HexapodModel::RobotState::Off);
             state_transitioning_ = false;
+            ROS_INFO("Ended sitting");
         }
     }
 }
