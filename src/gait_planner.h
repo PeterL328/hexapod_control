@@ -35,7 +35,11 @@ private:
     int period_cycle_length_{0};
     int previous_period_cycle_length_{0};
     int period_cycle_{0};
+    int reset_leg_period_cycle_length_{50};
     float publish_rate_;
+    float deadzone_{0.001};
+    bool was_travelling_{false};
+    bool is_travelling_{false};
 
     // Loads from parameter server
     float gait_period_distance_, leg_lift_height_;
