@@ -35,7 +35,7 @@ void GaitPlanner::reset_state() {
     period_cycle_ = 0;
     was_travelling_ = false;
     is_travelling_ = false;
-    force_extra_step = false;
+    force_extra_period_ = false;
 }
 
 void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
