@@ -25,6 +25,9 @@ public:
     /// \param twist The twist message.
     void update_model(geometry_msgs::Twist& twist);
 
+    /// Resets walk.
+    void reset_state();
+
 private:
     std::unique_ptr<Gait> gait_;
     std::shared_ptr<HexapodModel> hexapod_model_;

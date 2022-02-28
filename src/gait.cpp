@@ -9,9 +9,13 @@ Gait::Gait(Mode initial_gait) {
     configure_mapping();
 }
 
-void Gait::update_gait_mode(Mode new_mode) {
-    current_mode_ = new_mode;
+void Gait::reset_sequence() {
     current_seq_idx_ = 0;
+}
+
+void Gait::update_gait_mode(Mode new_mode) {
+    reset_sequence();
+    current_mode_ = new_mode;
 }
 
 std::vector<int> Gait::get_current_seq_and_next() {

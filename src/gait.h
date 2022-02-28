@@ -20,6 +20,9 @@ public:
     /// \param initial_gait The initial gait mode.
     explicit Gait(Mode initial_gait);
 
+    /// Resets the sequence.
+    void reset_sequence();
+
     /// Updates the current gait mode and resets the sequence index.
     /// \param new_mode The new gait mode.
     void update_gait_mode(Mode new_mode);
@@ -39,6 +42,7 @@ public:
     /// Gets the sequence index.
     /// \return The sequence index.
     int get_sequence_index();
+
 private:
     Mode current_mode_;
     int current_seq_idx_{0};

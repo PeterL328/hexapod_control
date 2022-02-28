@@ -131,6 +131,7 @@ void HexapodController::state_command_message_callback(std_msgs::String::ConstPt
 
     if (state->data == "Normal") {
         ROS_INFO("Entering normal mode...");
+        gait_planner_->reset_state();
         if (current_state == HexapodModel::RobotState::Off) {
             ROS_INFO("Starting standing...");
             hexapod_model_->set_current_robot_status(HexapodModel::RobotState::Normal);

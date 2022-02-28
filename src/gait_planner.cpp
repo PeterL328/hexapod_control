@@ -18,12 +18,23 @@ GaitPlanner::GaitPlanner(std::shared_ptr<HexapodModel> model, float publish_rate
 
     // Initialize gait.
     gait_ = std::make_unique<Gait>(Gait::Mode::Tripod);
-    gait_seq_ = gait_->get_current_seq_and_next();
-    legs_moved_ = std::vector<int>(gait_seq_.size(), 0);
+    reset_state();
 }
 
 void GaitPlanner::update_gait_mode(Gait::Mode new_mode) {
     gait_->update_gait_mode(new_mode);
+}
+
+void GaitPlanner::reset_state() {
+    // Reset gait
+    gait_->reset_sequence();
+    gait_seq_ = gait_->get_current_seq_and_next();
+    legs_moved_ = std::vector<int>(gait_seq_.size(), 0);
+
+    // Reset period
+    period_cycle_ = 0;
+    was_travelling_ = false;
+    is_travelling_ = false;
 }
 
 void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
