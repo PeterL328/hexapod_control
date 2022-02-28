@@ -43,6 +43,7 @@ private:
     float deadzone_{0.02};
     bool was_travelling_{false};
     bool is_travelling_{false};
+    bool force_extra_period_{false};
 
     // Loads from parameter server
     float gait_period_distance_, leg_lift_height_;

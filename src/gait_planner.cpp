@@ -35,6 +35,7 @@ void GaitPlanner::reset_state() {
     period_cycle_ = 0;
     was_travelling_ = false;
     is_travelling_ = false;
+    force_extra_step = false;
 }
 
 void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
@@ -78,9 +79,10 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         cycle_distance_meters_global_frame_y = cycle_distance_meters_global_frame[1];
     } else {
         is_travelling_ = false;
-        // Force extra step here.
-        if (was_travelling_) {
+        // Force extra cycle here.
+        if (was_travelling_ || force_extra_period_) {
             period_cycle_length_ = reset_leg_period_cycle_length_;
+            force_extra_period_ = false;
         } else {
             return;
         }
@@ -135,6 +137,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
         if (was_travelling_ && !is_travelling_) {
             was_travelling_ = false;
+            force_extra_period_ = true;
         }
     }
 
