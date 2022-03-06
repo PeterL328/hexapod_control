@@ -4,8 +4,7 @@
 
 #include "gait.h"
 
-Gait::Gait(Mode initial_gait) {
-    current_mode_ = initial_gait;
+Gait::Gait(Mode initial_gait) : current_mode_(initial_gait){
     configure_mapping();
 }
 
