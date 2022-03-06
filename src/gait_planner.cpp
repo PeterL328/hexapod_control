@@ -80,7 +80,12 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         is_travelling_ = false;
         // Force extra cycle here.
         if (was_travelling_ || force_extra_period_) {
+            previous_period_cycle_length_ = period_cycle_length_;
             period_cycle_length_ = reset_leg_period_cycle_length_;
+
+            if (previous_period_cycle_length_ != 0) {
+                period_cycle_ = round((static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_);
+            }
             force_extra_period_ = false;
         } else {
             return;
