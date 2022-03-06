@@ -78,7 +78,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         cycle_distance_meters_global_frame_y = cycle_distance_meters_global_frame[1];
     } else {
         is_travelling_ = false;
-        // Force extra cycle here.
+        // Force extra cycle here to get period of 0 so legs are are touching the ground.
         if (was_travelling_ || force_extra_period_) {
             previous_period_cycle_length_ = period_cycle_length_;
             period_cycle_length_ = reset_leg_period_cycle_length_;
@@ -95,7 +95,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     // Move the body.
     hexapod_model_->move_body_in_body_frame(cycle_distance_meters_global_frame_x * phase_time_ratio, cycle_distance_meters_global_frame_y * phase_time_ratio, 0);
 
-    // Get current feet/legs positions
+    // Get default feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
 
     // Move the legs.
