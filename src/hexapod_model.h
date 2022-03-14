@@ -95,6 +95,10 @@ public:
     /// \return The FeetPositions message.
     hexapod_msgs::FeetPositions get_feet_positions() const;
 
+    /// Gets the feet positions in body frame coordinates.
+    /// \return The FeetPositions message.
+    hexapod_msgs::FeetPositions get_feet_positions_in_body_frame() const;
+
     /// Gets the initial feet positions in the body frame coordinates
     /// \return The FeetPositions message.
     hexapod_msgs::FeetPositions get_initial_feet_positions_in_body_frame() const;

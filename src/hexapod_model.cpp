@@ -128,6 +128,26 @@ hexapod_msgs::FeetPositions HexapodModel::get_feet_positions() const {
     return feet_positions_;
 }
 
+hexapod_msgs::FeetPositions HexapodModel::get_feet_positions_in_body_frame() const {
+    Matrix3f body_rot_mat = get_body_rot_mat();
+    Matrix3f body_rot_mat_t = body_rot_mat.transpose();
+    Vector3f body_position_in_global(body_.position.x, body_.position.y, body_.position.z);
+
+    hexapod_msgs::FeetPositions feet_positions_in_body_frame;
+    for (int i = 0; i < 6; i++) {
+        Vector3f foot_position_in_global_position(
+            feet_positions_.foot[i].x,
+            feet_positions_.foot[i].y,
+            feet_positions_.foot[i].z);
+        Vector3f foot_position_in_local_position = body_rot_mat_t * (foot_position_in_global_position - body_position_in_global);
+        feet_positions_in_body_frame.foot[i].x = foot_position_in_local_position[0];
+        feet_positions_in_body_frame.foot[i].y = foot_position_in_local_position[1];
+        feet_positions_in_body_frame.foot[i].z = foot_position_in_local_position[2];
+    }
+
+    return feet_positions_in_body_frame;
+}
+
 hexapod_msgs::FeetPositions HexapodModel::get_initial_feet_positions_in_body_frame() const {
     return initial_feet_positions_;
 }
