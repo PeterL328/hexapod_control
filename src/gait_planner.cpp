@@ -43,6 +43,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     // Calculate the magnitude of the twist linear speed.
     float linear_speed_magnitude = sqrt(pow(twist.linear.x, 2) + pow(twist.linear.y, 2));
     float angular_speed_magnitude = abs(twist.angular.x);
+    float angular_distance_per_rate = angular_speed_magnitude / publish_rate_;
 
     float phase_time_ratio = 1 - gait_->get_duty_factor();
     float cycle_distance_meters_global_frame_x = 0.f;
@@ -120,16 +121,18 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
                 feet_positions_in_body_frame.foot[i].y);
 
             Vector2f perpendicular(0.f, 0.f);
-            if (twist.angular.x > 0) {
-                perpendicular = get_perpendicular_counterclockwise(center_to_feet);
-            } else {
+            if (twist.angular.x > 0.f) {
                 perpendicular = get_perpendicular_clockwise(center_to_feet);
+            } else {
+                perpendicular = get_perpendicular_counterclockwise(center_to_feet);
             }
 
-            // TODO: Scale the perpendicular vector by how much we want to rotate.
+            // Scale the perpendicular vector by how much we want to rotate.
+            // Find the arc length based on the angular velocity and radius (which is center to feet).
+            perpendicular *= angular_distance_per_rate * center_to_feet.norm();
 
             cycle_distance_meters_global_frame_x += perpendicular[0];
-            cycle_distance_meters_global_frame_y += perpendicular[0];
+            cycle_distance_meters_global_frame_y += perpendicular[1];
         }
 
         if (gait_seq_[i] == 1) {
