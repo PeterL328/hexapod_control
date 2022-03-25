@@ -100,8 +100,9 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
     // Move the body.
     hexapod_model_->move_body_in_body_frame(cycle_distance_meters_global_frame_x * phase_time_ratio, cycle_distance_meters_global_frame_y * phase_time_ratio, 0);
+    // TODO: Is rotating the body here correct? Will it mess with the set_foot_position_in_body_frame later?
     if (angular_speed_magnitude >= angular_deadzone_) {
-        hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate);
+        hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate * phase_time_ratio);
     }
 
 
@@ -119,7 +120,6 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
         if (angular_speed_magnitude >= angular_deadzone_) {
             // To add rotation, find vector perpendicular to the center_to_feet vector.
-            // There will be two perpendicular, choose the one that matches the direction.
             Vector2f center_to_feet(
                 feet_positions_in_body_frame.foot[i].x,
                 feet_positions_in_body_frame.foot[i].y);
