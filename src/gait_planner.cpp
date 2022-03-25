@@ -42,7 +42,7 @@ void GaitPlanner::reset_state() {
 void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     // Calculate the magnitude of the twist linear speed.
     float linear_speed_magnitude = sqrt(pow(twist.linear.x, 2) + pow(twist.linear.y, 2));
-    float angular_speed_magnitude = abs(twist.angular.x);
+    float angular_speed_magnitude = abs(twist.angular.z);
     float angular_distance_per_rate = angular_speed_magnitude / publish_rate_;
 
     float phase_time_ratio = 1 - gait_->get_duty_factor();
