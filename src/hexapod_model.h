@@ -55,6 +55,14 @@ public:
     /// \param roll
     void set_body_orientation(float pitch, float yaw, float roll);
 
+    /// Sets the roll of the body.
+    /// \param roll
+    void set_body_roll(float roll);
+
+    /// Gets the roll of the body.
+    /// \return The current orientation roll of the body.
+    float get_body_roll() const;
+
     /// Sets the position of the body.
     /// \param x
     /// \param y

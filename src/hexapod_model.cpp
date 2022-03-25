@@ -83,6 +83,14 @@ void HexapodModel::set_body_orientation(float pitch, float yaw, float roll) {
     body_.orientation.roll = roll;
 }
 
+void HexapodModel::set_body_roll(float roll) {
+    body_.orientation.roll = roll;
+}
+
+float HexapodModel::get_body_roll() const {
+    return body_.orientation.roll;
+}
+
 void HexapodModel::set_body_position(float x, float y, float z) {
     body_.position.x = x;
     body_.position.y = y;

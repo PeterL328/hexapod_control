@@ -43,7 +43,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     // Calculate the magnitude of the twist linear speed.
     float linear_speed_magnitude = sqrt(pow(twist.linear.x, 2) + pow(twist.linear.y, 2));
     float angular_speed_magnitude = abs(twist.angular.z);
-    float angular_distance_per_rate = angular_speed_magnitude / publish_rate_;
+    float angular_distance_per_rate = twist.angular.z / publish_rate_;
 
     float phase_time_ratio = 1 - gait_->get_duty_factor();
     float cycle_distance_meters_global_frame_x = 0.f;
@@ -100,6 +100,10 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
     // Move the body.
     hexapod_model_->move_body_in_body_frame(cycle_distance_meters_global_frame_x * phase_time_ratio, cycle_distance_meters_global_frame_y * phase_time_ratio, 0);
+    if (angular_speed_magnitude >= angular_deadzone_) {
+        hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate);
+    }
+
 
     // Get default feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
@@ -121,11 +125,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
                 feet_positions_in_body_frame.foot[i].y);
 
             Vector2f perpendicular(0.f, 0.f);
-            if (twist.angular.z > 0.f) {
-                perpendicular = get_perpendicular_clockwise(center_to_feet);
-            } else {
-                perpendicular = get_perpendicular_counterclockwise(center_to_feet);
-            }
+            perpendicular = get_perpendicular_clockwise(center_to_feet);
 
             // Scale the perpendicular vector by how much we want to rotate.
             // Find the arc length based on the angular velocity and radius (which is center to feet).
@@ -183,8 +183,4 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
 Vector2f GaitPlanner::get_perpendicular_clockwise(const Vector2f &vec) const {
     return Vector2f(vec[1], -vec[0]).normalized();
-}
-
-Vector2f GaitPlanner::get_perpendicular_counterclockwise(const Vector2f &vec) const {
-    return Vector2f(-vec[1], vec[0]).normalized();
 }

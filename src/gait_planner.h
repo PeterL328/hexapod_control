@@ -53,9 +53,6 @@ private:
 
     /// Get the vector that is perpendicular to the clockwise.
     Eigen::Vector2f get_perpendicular_clockwise(const Eigen::Vector2f &vec) const;
-
-    /// Get the vector that is perpendicular to the counter-clockwise.
-    Eigen::Vector2f get_perpendicular_counterclockwise(const Eigen::Vector2f &vec) const;
 };
 
 
