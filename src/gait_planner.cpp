@@ -121,7 +121,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
                 feet_positions_in_body_frame.foot[i].y);
 
             Vector2f perpendicular(0.f, 0.f);
-            if (twist.angular.x > 0.f) {
+            if (twist.angular.z > 0.f) {
                 perpendicular = get_perpendicular_clockwise(center_to_feet);
             } else {
                 perpendicular = get_perpendicular_counterclockwise(center_to_feet);
