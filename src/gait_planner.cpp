@@ -46,8 +46,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     float angular_distance_per_rate = twist.angular.z / publish_rate_;
 
     float phase_time_ratio = 1 - gait_->get_duty_factor();
-    float cycle_distance_meters_global_frame_x = 0.f;
-    float cycle_distance_meters_global_frame_y = 0.f;
+    float cycle_distance_meters_local_frame_x = 0.f;
+    float cycle_distance_meters_local_frame_y = 0.f;
 
     if (linear_speed_magnitude >= linear_deadzone_ || angular_speed_magnitude >= angular_deadzone_) {
         is_travelling_ = true;
@@ -72,16 +72,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         }
 
         // Get the distances in x and y-axis to move for one cycle (frame)
-        float cycle_distance_meters_local_frame_x = twist.linear.x / publish_rate_;
-        float cycle_distance_meters_local_frame_y = twist.linear.y / publish_rate_;
-
-        Vector3f cycle_distance_meters_local_frame(cycle_distance_meters_local_frame_x, cycle_distance_meters_local_frame_y, 0);
-        Matrix3f body_rot_mat = hexapod_model_->get_body_rot_mat();
-
-        Vector3f cycle_distance_meters_global_frame = body_rot_mat * cycle_distance_meters_local_frame;
-
-        cycle_distance_meters_global_frame_x = cycle_distance_meters_global_frame[0];
-        cycle_distance_meters_global_frame_y = cycle_distance_meters_global_frame[1];
+        cycle_distance_meters_local_frame_x = twist.linear.x / publish_rate_;
+        cycle_distance_meters_local_frame_y = twist.linear.y / publish_rate_;
     } else {
         is_travelling_ = false;
         // Force extra cycle here to get period of 0 so legs are touching the ground.
@@ -99,12 +91,12 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     }
 
     // Move the body.
-    hexapod_model_->move_body_in_body_frame(cycle_distance_meters_global_frame_x * phase_time_ratio, cycle_distance_meters_global_frame_y * phase_time_ratio, 0);
+    hexapod_model_->move_body_in_body_frame(cycle_distance_meters_local_frame_x * phase_time_ratio, cycle_distance_meters_local_frame_y * phase_time_ratio, 0);
+
     // TODO: Is rotating the body here correct? Will it mess with the set_foot_position_in_body_frame later?
     if (angular_speed_magnitude >= angular_deadzone_) {
         hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate * phase_time_ratio);
     }
-
 
     // Get default feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
@@ -124,20 +116,19 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
                 feet_positions_in_body_frame.foot[i].x,
                 feet_positions_in_body_frame.foot[i].y);
 
-            Vector2f perpendicular(0.f, 0.f);
-            perpendicular = get_perpendicular_clockwise(center_to_feet);
+            Vector2f perpendicular = get_perpendicular_clockwise(center_to_feet);
 
             // Scale the perpendicular vector by how much we want to rotate.
             // Find the arc length based on the angular velocity and radius (which is center to feet).
             perpendicular *= angular_distance_per_rate * center_to_feet.norm();
 
-            cycle_distance_meters_global_frame_x += perpendicular[0];
-            cycle_distance_meters_global_frame_y += perpendicular[1];
+            cycle_distance_meters_local_frame_x += perpendicular[0];
+            cycle_distance_meters_local_frame_y += perpendicular[1];
         }
 
         if (gait_seq_[i] == 1) {
-            new_x += cycle_distance_meters_global_frame_x * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
-            new_y += cycle_distance_meters_global_frame_y * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
+            new_x += cycle_distance_meters_local_frame_x * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
+            new_y += cycle_distance_meters_local_frame_y * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
 
             new_z = leg_lift_height_ * (static_cast<float>(period_cycle_) / period_cycle_length_) - hexapod_model_->get_standing_height();
 
@@ -145,14 +136,14 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
             legs_moved_[i] = 1;
         }
         else if (legs_moved_[i] == 1) {
-            new_x += cycle_distance_meters_global_frame_x * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
-            new_y += cycle_distance_meters_global_frame_y * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
+            new_x += cycle_distance_meters_local_frame_x * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
+            new_y += cycle_distance_meters_local_frame_y * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
 
             new_z = hexapod_model_->get_standing_height() * -1;
         }
         else {
-            new_x -= cycle_distance_meters_global_frame_x * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
-            new_y -= cycle_distance_meters_global_frame_y * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
+            new_x -= cycle_distance_meters_local_frame_x * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
+            new_y -= cycle_distance_meters_local_frame_y * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
 
             // Since we are working in the local frame, the feet contact point has negative z value.
             new_z = hexapod_model_->get_standing_height() * -1;
