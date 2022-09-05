@@ -137,8 +137,7 @@ hexapod_msgs::FeetPositions HexapodModel::get_feet_positions() const {
 }
 
 hexapod_msgs::FeetPositions HexapodModel::get_feet_positions_in_body_frame() const {
-    Matrix3f body_rot_mat = get_body_rot_mat();
-    Matrix3f body_rot_mat_t = body_rot_mat.transpose();
+    Matrix3f body_rot_mat_t = get_body_rot_mat().transpose();
     Vector3f body_position_in_global(body_.position.x, body_.position.y, body_.position.z);
 
     hexapod_msgs::FeetPositions feet_positions_in_body_frame;
