@@ -101,11 +101,30 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     // Get default feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
 
+    // Get current feet/legs positions in body frame
+    hexapod_msgs::FeetPositions feet_positions_in_body_frame = hexapod_model_->get_feet_positions_in_body_frame();
+
     // Move the legs.
     for (int i = 0; i < 6; i++) {
         float new_x = default_feet_positions_in_body_frame.foot[i].x;
         float new_y = default_feet_positions_in_body_frame.foot[i].y;
         float new_z = default_feet_positions_in_body_frame.foot[i].z;
+
+        if (angular_speed_magnitude >= angular_deadzone_) {
+            // To add rotation, find vector perpendicular to the center_to_feet vector.
+            Vector2f center_to_feet(
+                feet_positions_in_body_frame.foot[i].x,
+                feet_positions_in_body_frame.foot[i].y);
+
+            Vector2f perpendicular = get_perpendicular_clockwise(center_to_feet);
+
+            // Scale the perpendicular vector by how much we want to rotate.
+            // Find the arc length based on the angular velocity and radius (which is center to feet).
+            perpendicular *= angular_distance_per_rate * center_to_feet.norm();
+
+            cycle_distance_meters_local_frame_x += perpendicular[0];
+            cycle_distance_meters_local_frame_y += perpendicular[1];
+        }
 
         if (gait_seq_[i] == 1) {
             new_x += cycle_distance_meters_local_frame_x * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
@@ -131,11 +150,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         }
         hexapod_model_->set_foot_position_in_body_frame(i, new_x, new_y, new_z);
     }
-    Matrix3f body_rot_mat = hexapod_model_->get_body_rot_mat();
-    IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
-    std::cout << body_rot_mat.format(CleanFmt) << std::endl;
 
-    std::cout << " --------------------" << std::endl;
     period_cycle_++;
     if (period_cycle_ == period_cycle_length_) {
         // Clear the marking vector.
