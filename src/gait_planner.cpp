@@ -101,9 +101,6 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     // Get default feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
 
-    // Get current feet/legs positions in body frame
-    hexapod_msgs::FeetPositions feet_positions_in_body_frame = hexapod_model_->get_feet_positions_in_body_frame();
-
     // Move the legs.
     for (int i = 0; i < 6; i++) {
         float new_x = default_feet_positions_in_body_frame.foot[i].x;
