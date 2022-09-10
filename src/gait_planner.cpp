@@ -110,13 +110,13 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         }
     }
 
-//    // TODO: Is rotating the body here correct? Will it mess with the set_foot_position_in_body_frame later?
-//    if (angular_speed_magnitude >= angular_deadzone_) {
-//        hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate * phase_time_ratio);
-//    }
-
     // Move the body.
     hexapod_model_->move_body_in_body_frame(cycle_distance_meters_local_frame_x * phase_time_ratio, cycle_distance_meters_local_frame_y * phase_time_ratio, 0);
+
+    // TODO: Make this work. Robot rotates fine without this.
+/*    if (angular_speed_magnitude >= angular_deadzone_) {
+        hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate * phase_time_ratio);
+    }*/
 
     // Get default feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
@@ -144,7 +144,6 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
             cycle_distance_from_rotation_meters_local_frame_x = perpendicular[0];
             cycle_distance_from_rotation_meters_local_frame_y = perpendicular[1];
-            // ROS_INFO("Leg %d: x: %f, y: %f | p_x: %f, p_y: %f", i, cycle_distance_from_rotation_meters_local_frame_x, cycle_distance_from_rotation_meters_local_frame_y, perpendicular[0], perpendicular[1]);
         }
 
         float cycle_total_distance_meters_local_frame_x =
@@ -187,7 +186,6 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         }
         hexapod_model_->set_foot_position_in_body_frame(i, new_x, new_y, new_z);
     }
-    // ROS_INFO("-----");
 
     period_cycle_++;
     if (period_cycle_ == period_cycle_length_) {

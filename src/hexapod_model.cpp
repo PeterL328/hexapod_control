@@ -211,6 +211,7 @@ Matrix3f HexapodModel::get_body_rot_mat() const {
 }
 
 Matrix3f HexapodModel::euler_angles_to_rotation_matrix(float roll, float yaw, float pitch) const {
+    // TODO: Might be an issue here with axis
     AngleAxisf rollAngle(roll, Vector3f::UnitZ());
     AngleAxisf yawAngle(yaw, Vector3f::UnitY());
     AngleAxisf pitchAngle(pitch, Vector3f::UnitX());
