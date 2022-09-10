@@ -49,7 +49,27 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     float cycle_distance_meters_local_frame_x = 0.f;
     float cycle_distance_meters_local_frame_y = 0.f;
 
-    if (linear_speed_magnitude >= linear_deadzone_ || angular_speed_magnitude >= angular_deadzone_) {
+    if (angular_speed_magnitude >= angular_deadzone_) {
+        is_travelling_ = true;
+        if (!was_travelling_) {
+            period_cycle_ = 0;
+        }
+        // Most likely the speed changed, so the period length also changed.
+        previous_period_cycle_length_ = period_cycle_length_;
+
+        // Each gait period has many cycles depending on the gait mode. We can calculate the distance to be traversed
+        // in one cycle.
+        float rotation_per_cycle = (gait_period_rotation_) * phase_time_ratio;
+
+        // (speed / publish rate) is the distance to be traversed in one compute frame (cycle).
+        // This cycle is not the same as the gait cycle.
+        // TODO: Speed magnitude needs to include the angular speed
+        period_cycle_length_ = rotation_per_cycle / (angular_speed_magnitude / publish_rate_);
+
+        if (previous_period_cycle_length_ != 0) {
+            period_cycle_ = round((static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_);
+        }
+    } else if (linear_speed_magnitude >= linear_deadzone_) {
         is_travelling_ = true;
         if (!was_travelling_) {
             period_cycle_ = 0;
@@ -90,10 +110,10 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         }
     }
 
-    // TODO: Is rotating the body here correct? Will it mess with the set_foot_position_in_body_frame later?
-    if (angular_speed_magnitude >= angular_deadzone_) {
-        hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate * phase_time_ratio);
-    }
+//    // TODO: Is rotating the body here correct? Will it mess with the set_foot_position_in_body_frame later?
+//    if (angular_speed_magnitude >= angular_deadzone_) {
+//        hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate * phase_time_ratio);
+//    }
 
     // Move the body.
     hexapod_model_->move_body_in_body_frame(cycle_distance_meters_local_frame_x * phase_time_ratio, cycle_distance_meters_local_frame_y * phase_time_ratio, 0);
@@ -101,20 +121,20 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     // Get default feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
 
-    // Get current feet/legs positions in body frame
-    hexapod_msgs::FeetPositions feet_positions_in_body_frame = hexapod_model_->get_feet_positions_in_body_frame();
-
     // Move the legs.
     for (int i = 0; i < 6; i++) {
         float new_x = default_feet_positions_in_body_frame.foot[i].x;
         float new_y = default_feet_positions_in_body_frame.foot[i].y;
         float new_z = default_feet_positions_in_body_frame.foot[i].z;
 
+        float cycle_distance_from_rotation_meters_local_frame_x = 0;
+        float cycle_distance_from_rotation_meters_local_frame_y = 0;
+
         if (angular_speed_magnitude >= angular_deadzone_) {
             // To add rotation, find vector perpendicular to the center_to_feet vector.
             Vector2f center_to_feet(
-                feet_positions_in_body_frame.foot[i].x,
-                feet_positions_in_body_frame.foot[i].y);
+                    default_feet_positions_in_body_frame.foot[i].x,
+                    default_feet_positions_in_body_frame.foot[i].y);
 
             Vector2f perpendicular = get_perpendicular_clockwise(center_to_feet);
 
@@ -122,34 +142,52 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
             // Find the arc length based on the angular velocity and radius (which is center to feet).
             perpendicular *= angular_distance_per_rate * center_to_feet.norm();
 
-            cycle_distance_meters_local_frame_x += perpendicular[0];
-            cycle_distance_meters_local_frame_y += perpendicular[1];
+            cycle_distance_from_rotation_meters_local_frame_x = perpendicular[0];
+            cycle_distance_from_rotation_meters_local_frame_y = perpendicular[1];
+            // ROS_INFO("Leg %d: x: %f, y: %f | p_x: %f, p_y: %f", i, cycle_distance_from_rotation_meters_local_frame_x, cycle_distance_from_rotation_meters_local_frame_y, perpendicular[0], perpendicular[1]);
         }
 
-        if (gait_seq_[i] == 1) {
-            new_x += cycle_distance_meters_local_frame_x * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
-            new_y += cycle_distance_meters_local_frame_y * ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + ((1  - phase_time_ratio) * (period_cycle_ + 1)));
+        float cycle_total_distance_meters_local_frame_x =
+                cycle_distance_meters_local_frame_x + cycle_distance_from_rotation_meters_local_frame_x;
+        float cycle_total_distance_meters_local_frame_y =
+                cycle_distance_meters_local_frame_y + cycle_distance_from_rotation_meters_local_frame_y;
 
-            new_z = leg_lift_height_ * (static_cast<float>(period_cycle_) / period_cycle_length_) - hexapod_model_->get_standing_height();
+        if (gait_seq_[i] == 1) {
+            new_x += cycle_total_distance_meters_local_frame_x *
+                     ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) +
+                      ((1 - phase_time_ratio) * (period_cycle_ + 1)));
+            new_y += cycle_total_distance_meters_local_frame_y *
+                     ((-1 * phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) +
+                      ((1 - phase_time_ratio) * (period_cycle_ + 1)));
+
+            new_z = leg_lift_height_ * (static_cast<float>(period_cycle_) / period_cycle_length_) -
+                    hexapod_model_->get_standing_height();
 
             // After we lift the leg and move it, mark it.
             legs_moved_[i] = 1;
-        }
-        else if (legs_moved_[i] == 1) {
-            new_x += cycle_distance_meters_local_frame_x * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
-            new_y += cycle_distance_meters_local_frame_y * (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) - (phase_time_ratio * (period_cycle_ + 1)));
+        } else if (legs_moved_[i] == 1) {
+            new_x += cycle_total_distance_meters_local_frame_x *
+                     (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) -
+                      (phase_time_ratio * (period_cycle_ + 1)));
+            new_y += cycle_total_distance_meters_local_frame_y *
+                     (((1 - phase_time_ratio * gait_->get_sequence_index()) * (period_cycle_length_)) -
+                      (phase_time_ratio * (period_cycle_ + 1)));
 
             new_z = hexapod_model_->get_standing_height() * -1;
-        }
-        else {
-            new_x -= cycle_distance_meters_local_frame_x * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
-            new_y -= cycle_distance_meters_local_frame_y * ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) + (phase_time_ratio * (period_cycle_ + 1)));
+        } else {
+            new_x -= cycle_total_distance_meters_local_frame_x *
+                     ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) +
+                      (phase_time_ratio * (period_cycle_ + 1)));
+            new_y -= cycle_total_distance_meters_local_frame_y *
+                     ((phase_time_ratio * gait_->get_sequence_index() * (period_cycle_length_)) +
+                      (phase_time_ratio * (period_cycle_ + 1)));
 
             // Since we are working in the local frame, the feet contact point has negative z value.
             new_z = hexapod_model_->get_standing_height() * -1;
         }
         hexapod_model_->set_foot_position_in_body_frame(i, new_x, new_y, new_z);
     }
+    // ROS_INFO("-----");
 
     period_cycle_++;
     if (period_cycle_ == period_cycle_length_) {
