@@ -121,6 +121,9 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     // Get default feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
 
+    // Get current feet/legs positions
+    hexapod_msgs::FeetPositions feet_positions_in_body_frame = hexapod_model_->get_feet_positions_in_body_frame();
+
     // Move the legs.
     for (int i = 0; i < 6; i++) {
         float new_x = default_feet_positions_in_body_frame.foot[i].x;
@@ -133,8 +136,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         if (angular_speed_magnitude >= angular_deadzone_) {
             // To add rotation, find vector perpendicular to the center_to_feet vector.
             Vector2f center_to_feet(
-                    default_feet_positions_in_body_frame.foot[i].x,
-                    default_feet_positions_in_body_frame.foot[i].y);
+                    feet_positions_in_body_frame.foot[i].x,
+                    feet_positions_in_body_frame.foot[i].y);
 
             Vector2f perpendicular = get_perpendicular_clockwise(center_to_feet);
 
