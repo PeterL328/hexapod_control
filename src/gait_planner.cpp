@@ -110,19 +110,19 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         }
     }
 
-    // TODO: Make this work. Robot rotates fine without this.
-    if (angular_speed_magnitude >= angular_deadzone_) {
-        hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate * phase_time_ratio);
-    }
-
-    // Move the body.
-    hexapod_model_->move_body_in_body_frame(cycle_distance_meters_local_frame_x * phase_time_ratio, cycle_distance_meters_local_frame_y * phase_time_ratio, 0);
-
     // Get default feet/legs positions
     hexapod_msgs::FeetPositions default_feet_positions_in_body_frame = hexapod_model_->get_initial_feet_positions_in_body_frame();
 
     // Get current feet/legs positions
     hexapod_msgs::FeetPositions feet_positions_in_body_frame = hexapod_model_->get_feet_positions_in_body_frame();
+
+/*    // TODO: Make this work. Robot rotates fine without this.
+    if (angular_speed_magnitude >= angular_deadzone_) {
+        hexapod_model_->set_body_roll(hexapod_model_->get_body_roll() + angular_distance_per_rate * phase_time_ratio);
+    }*/
+
+    // Move the body.
+    hexapod_model_->move_body_in_body_frame(cycle_distance_meters_local_frame_x * phase_time_ratio, cycle_distance_meters_local_frame_y * phase_time_ratio, 0);
 
     // Move the legs.
     for (int i = 0; i < 6; i++) {
@@ -189,18 +189,6 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         }
         hexapod_model_->set_foot_position_in_body_frame(i, new_x, new_y, new_z);
     }
-
-/*    hexapod_msgs::FeetPositions ft = hexapod_model_->get_feet_positions();
-
-    ROS_INFO("--------------");
-    for (int i = 0; i < 6; i++) {
-        ROS_INFO("Leg %d: x: %f, y: %f, z: %f", i, ft.foot[i].x, ft.foot[i].y, ft.foot[i].z);
-    }
-    ROS_INFO("ROLL: %f", hexapod_model_->get_body_roll());
-    Matrix3f mat = hexapod_model_->get_body_rot_mat();
-    IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
-    std::cout << mat.format(CleanFmt) << std::endl;*/
-
 
     period_cycle_++;
     if (period_cycle_ == period_cycle_length_) {
