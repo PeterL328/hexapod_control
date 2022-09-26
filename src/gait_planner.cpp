@@ -64,9 +64,16 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
         // (speed / publish rate) is the distance to be traversed in one compute frame (cycle).
         // This cycle is not the same as the gait cycle.
-        period_cycle_length_ = std::max(
-                distance_per_cycle / (linear_speed_magnitude / publish_rate_),
-                rotation_per_cycle / (angular_speed_magnitude / publish_rate_));
+        float dist_component = distance_per_cycle / (linear_speed_magnitude / publish_rate_);
+        float rotation_component = rotation_per_cycle / (angular_speed_magnitude / publish_rate_);
+
+        if (angular_speed_magnitude >= angular_deadzone_ && linear_speed_magnitude >= linear_deadzone_) {
+            period_cycle_length_ = std::max(dist_component, rotation_component);
+        } else if (linear_speed_magnitude >= linear_deadzone_) {
+            period_cycle_length_ = dist_component;
+        } else {
+            period_cycle_length_ = rotation_component;
+        }
 
         if (previous_period_cycle_length_ != 0) {
             period_cycle_ = round((static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_);
