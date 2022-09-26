@@ -50,10 +50,13 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     float cycle_distance_meters_local_frame_y = 0.f;
 
     if (angular_speed_magnitude >= angular_deadzone_ || linear_speed_magnitude >= linear_deadzone_) {
+        is_translating_ = linear_speed_magnitude >= linear_deadzone_;
         is_travelling_ = true;
-        if (!was_travelling_) {
+
+        if (!was_travelling_ || was_translating_ && !is_translating_ || !was_translating_ && is_translating_) {
             period_cycle_ = 0;
         }
+
         // Most likely the speed changed, so the period length also changed.
         previous_period_cycle_length_ = period_cycle_length_;
 
@@ -67,13 +70,8 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         float dist_component = distance_per_cycle / (linear_speed_magnitude / publish_rate_);
         float rotation_component = rotation_per_cycle / (angular_speed_magnitude / publish_rate_);
 
-        if (angular_speed_magnitude >= angular_deadzone_ && linear_speed_magnitude >= linear_deadzone_) {
-            period_cycle_length_ = std::max(dist_component, rotation_component);
-        } else if (linear_speed_magnitude >= linear_deadzone_) {
-            period_cycle_length_ = dist_component;
-        } else {
-            period_cycle_length_ = rotation_component;
-        }
+        period_cycle_length_ = angular_speed_magnitude >= angular_deadzone_ ? rotation_component : dist_component;
+        was_travelling_ = linear_speed_magnitude >= linear_deadzone_;
 
         if (previous_period_cycle_length_ != 0) {
             period_cycle_ = round((static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_);

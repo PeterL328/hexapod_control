@@ -46,6 +46,7 @@ private:
     bool is_travelling_{false};
     bool force_extra_period_{false};
     bool is_translating_{true};
+    bool was_translating_{true};
 
     // Loads from parameter server
     float gait_period_distance_;
