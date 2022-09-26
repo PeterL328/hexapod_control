@@ -49,7 +49,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     float cycle_distance_meters_local_frame_x = 0.f;
     float cycle_distance_meters_local_frame_y = 0.f;
 
-    if (angular_speed_magnitude >= angular_deadzone_) {
+    if (angular_speed_magnitude >= angular_deadzone_ || linear_speed_magnitude >= linear_deadzone_) {
         is_travelling_ = true;
         if (!was_travelling_) {
             period_cycle_ = 0;
@@ -60,32 +60,13 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         // Each gait period has many cycles depending on the gait mode. We can calculate the distance to be traversed
         // in one cycle.
         float rotation_per_cycle = (gait_period_rotation_) * phase_time_ratio;
-
-        // (speed / publish rate) is the distance to be traversed in one compute frame (cycle).
-        // This cycle is not the same as the gait cycle.
-        // TODO: Speed magnitude needs to include the angular speed
-        period_cycle_length_ = rotation_per_cycle / (angular_speed_magnitude / publish_rate_);
-
-        if (previous_period_cycle_length_ != 0) {
-            period_cycle_ = round((static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_);
-        }
-    } else if (linear_speed_magnitude >= linear_deadzone_) {
-        is_travelling_ = true;
-        if (!was_travelling_) {
-            period_cycle_ = 0;
-        }
-        // Most likely the speed changed, so the period length also changed.
-        previous_period_cycle_length_ = period_cycle_length_;
-
-        // Each gait period has many cycles depending on the gait mode. We can calculate the distance to be traversed
-        // in one cycle.
-        // TODO: Introducing rotation, distance to be traversed in one cycle may be different for each leg
         float distance_per_cycle = (gait_period_distance_) * phase_time_ratio;
 
         // (speed / publish rate) is the distance to be traversed in one compute frame (cycle).
         // This cycle is not the same as the gait cycle.
-        // TODO: Speed magnitude needs to include the angular speed
-        period_cycle_length_ = distance_per_cycle / (linear_speed_magnitude / publish_rate_);
+        period_cycle_length_ = std::max(
+                distance_per_cycle / (linear_speed_magnitude / publish_rate_),
+                rotation_per_cycle / (angular_speed_magnitude / publish_rate_));
 
         if (previous_period_cycle_length_ != 0) {
             period_cycle_ = round((static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_);
