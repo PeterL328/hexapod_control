@@ -53,7 +53,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         is_translating_ = linear_speed_magnitude >= linear_deadzone_;
         is_travelling_ = true;
 
-        if (!was_travelling_ || was_translating_ && !is_translating_ || !was_translating_ && is_translating_) {
+        if (!was_travelling_ || (was_translating_ && !is_translating_) || (!was_translating_ && is_translating_)) {
             period_cycle_ = 0;
         }
 
