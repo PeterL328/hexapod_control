@@ -71,7 +71,7 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         float rotation_component = rotation_per_cycle / (angular_speed_magnitude / publish_rate_);
 
         period_cycle_length_ = angular_speed_magnitude >= angular_deadzone_ ? rotation_component : dist_component;
-        is_translating_ = linear_speed_magnitude >= linear_deadzone_;
+        was_translating_ = linear_speed_magnitude >= linear_deadzone_;
 
         if (previous_period_cycle_length_ != 0) {
             period_cycle_ = round((static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_);
