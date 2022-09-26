@@ -40,13 +40,21 @@ private:
     int period_cycle_{0};
     int reset_leg_period_cycle_length_{30};
     float publish_rate_;
-    float deadzone_{0.02};
+    float linear_deadzone_{0.02};
+    float angular_deadzone_{0.02};
     bool was_travelling_{false};
     bool is_travelling_{false};
     bool force_extra_period_{false};
+    bool is_rotating_{false};
+    bool was_rotating_{false};
 
     // Loads from parameter server
-    float gait_period_distance_, leg_lift_height_;
+    float gait_period_distance_;
+    float gait_period_rotation_;
+    float leg_lift_height_;
+
+    /// Get the vector that is perpendicular to the clockwise.
+    Eigen::Vector2f get_perpendicular_clockwise(const Eigen::Vector2f &vec) const;
 };
 
 

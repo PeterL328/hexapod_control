@@ -55,6 +55,14 @@ public:
     /// \param roll
     void set_body_orientation(float pitch, float yaw, float roll);
 
+    /// Sets the roll of the body.
+    /// \param roll
+    void set_body_roll(float roll);
+
+    /// Gets the roll of the body.
+    /// \return The current orientation roll of the body.
+    float get_body_roll() const;
+
     /// Sets the position of the body.
     /// \param x
     /// \param y
@@ -94,6 +102,10 @@ public:
     /// Gets the feet positions in global coordinates.
     /// \return The FeetPositions message.
     hexapod_msgs::FeetPositions get_feet_positions() const;
+
+    /// Gets the feet positions in body frame coordinates.
+    /// \return The FeetPositions message.
+    hexapod_msgs::FeetPositions get_feet_positions_in_body_frame() const;
 
     /// Gets the initial feet positions in the body frame coordinates
     /// \return The FeetPositions message.

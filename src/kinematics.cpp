@@ -11,7 +11,7 @@
 
 using namespace Eigen;
 
-Kinematics::Kinematics(std::shared_ptr<HexapodModel> model) : hexapod_model_(model){
+Kinematics::Kinematics(std::shared_ptr <HexapodModel> model) : hexapod_model_(model) {
 }
 
 hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints() {
@@ -35,24 +35,35 @@ hexapod_msgs::LegsJoints Kinematics::body_feet_config_to_legs_joints() {
     for (int i = 0; i < feet_positions.foot.size(); i++) {
         // TODO: Check if feet position is reachable.
         Vector3f body_origin_to_coxa_joint_in_local = hexapod_model_->get_center_to_coxa(i);
-        Vector3f global_origin_to_feet_ground_contact_point(feet_positions.foot[i].x, feet_positions.foot[i].y, feet_positions.foot[i].z);
+        Vector3f global_origin_to_feet_ground_contact_point(feet_positions.foot[i].x, feet_positions.foot[i].y,
+                                                            feet_positions.foot[i].z);
 
-        Vector3f feet_ground_contact_point_to_coxa = global_origin_to_body_origin + (body_rot_mat * body_origin_to_coxa_joint_in_local) - global_origin_to_feet_ground_contact_point;
+        Vector3f feet_ground_contact_point_to_coxa =
+                global_origin_to_body_origin + (body_rot_mat * body_origin_to_coxa_joint_in_local) -
+                global_origin_to_feet_ground_contact_point;
         float coxa_angle_rad = atan(feet_ground_contact_point_to_coxa[1] / feet_ground_contact_point_to_coxa[0]);
 
         int leg_dir = i <= 2 ? -1 : 1;
         Vector3f body_origin_to_femur_joint_in_local(
-            body_origin_to_coxa_joint_in_local[0] + (leg_dir * coxa_length * cos(coxa_angle_rad)),
-            body_origin_to_coxa_joint_in_local[1] + (leg_dir * coxa_length * sin(coxa_angle_rad)),
-            body_origin_to_coxa_joint_in_local[2]);
+                body_origin_to_coxa_joint_in_local[0] + (leg_dir * coxa_length * cos(coxa_angle_rad)),
+                body_origin_to_coxa_joint_in_local[1] + (leg_dir * coxa_length * sin(coxa_angle_rad)),
+                body_origin_to_coxa_joint_in_local[2]);
 
-        Vector3f feet_ground_contact_point_to_femur = global_origin_to_body_origin + (body_rot_mat * body_origin_to_femur_joint_in_local) - global_origin_to_feet_ground_contact_point;
+        Vector3f feet_ground_contact_point_to_femur =
+                global_origin_to_body_origin + (body_rot_mat * body_origin_to_femur_joint_in_local) -
+                global_origin_to_feet_ground_contact_point;
 
-        float rho_angle = atan(feet_ground_contact_point_to_femur[2] / sqrt(pow(feet_ground_contact_point_to_femur[0], 2) + pow(feet_ground_contact_point_to_femur[1], 2)));
-        float phi_angle = asin((feet_ground_contact_point_to_femur[2] - feet_ground_contact_point_to_coxa[2])/ coxa_length);
+        float rho_angle = atan(feet_ground_contact_point_to_femur[2] /
+                               sqrt(pow(feet_ground_contact_point_to_femur[0], 2) +
+                                    pow(feet_ground_contact_point_to_femur[1], 2)));
+        float phi_angle = asin(
+                (feet_ground_contact_point_to_femur[2] - feet_ground_contact_point_to_coxa[2]) / coxa_length);
 
-        float femur_angle_rad = acos((pow(femur_length, 2) + feet_ground_contact_point_to_femur.squaredNorm() - pow(tibia_length, 2)) / (2.f * femur_length * feet_ground_contact_point_to_femur.norm())) - (rho_angle + phi_angle);
-        float tibia_angle_rad = M_PI_2 - acos((pow(femur_length, 2) - feet_ground_contact_point_to_femur.squaredNorm() + pow(tibia_length, 2)) / (2.f * femur_length * tibia_length));
+        float femur_angle_rad =
+                acos((pow(femur_length, 2) + feet_ground_contact_point_to_femur.squaredNorm() - pow(tibia_length, 2)) /
+                     (2.f * femur_length * feet_ground_contact_point_to_femur.norm())) - (rho_angle + phi_angle);
+        float tibia_angle_rad = M_PI_2 - acos((pow(femur_length, 2) - feet_ground_contact_point_to_femur.squaredNorm() +
+                                               pow(tibia_length, 2)) / (2.f * femur_length * tibia_length));
 
         switch (i) {
             case 0:
