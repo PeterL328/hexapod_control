@@ -50,10 +50,10 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
     float cycle_distance_meters_local_frame_y = 0.f;
 
     if (angular_speed_magnitude >= angular_deadzone_ || linear_speed_magnitude >= linear_deadzone_) {
-        is_translating_ = linear_speed_magnitude >= linear_deadzone_;
+        is_rotating_ = angular_speed_magnitude >= angular_deadzone_;
         is_travelling_ = true;
 
-        if (!was_travelling_ || (was_translating_ && !is_translating_) || (!was_translating_ && is_translating_)) {
+        if (!was_travelling_ || (was_rotating_ && !is_rotating_) || (!was_rotating_ && is_rotating_)) {
             period_cycle_ = 0;
         }
 
@@ -70,16 +70,20 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
         float dist_component = distance_per_cycle / (linear_speed_magnitude / publish_rate_);
         float rotation_component = rotation_per_cycle / (angular_speed_magnitude / publish_rate_);
 
-        period_cycle_length_ = angular_speed_magnitude >= angular_deadzone_ ? rotation_component : dist_component;
-        was_translating_ = linear_speed_magnitude >= linear_deadzone_;
+        if (angular_speed_magnitude >= angular_deadzone_) {
+            period_cycle_length_ = rotation_component;
+            was_rotating_ = true;
+        } else {
+            // Get the distances in x and y-axis to move for one cycle (frame)
+            cycle_distance_meters_local_frame_x = twist.linear.x / publish_rate_;
+            cycle_distance_meters_local_frame_y = twist.linear.y / publish_rate_;
+            period_cycle_length_ = dist_component;
+            was_rotating_ = false;
+        }
 
         if (previous_period_cycle_length_ != 0) {
             period_cycle_ = round((static_cast<float>(period_cycle_) / previous_period_cycle_length_) * period_cycle_length_);
         }
-
-        // Get the distances in x and y-axis to move for one cycle (frame)
-        cycle_distance_meters_local_frame_x = twist.linear.x / publish_rate_;
-        cycle_distance_meters_local_frame_y = twist.linear.y / publish_rate_;
     } else {
         is_travelling_ = false;
         // Force extra cycle here to get period of 0 so legs are touching the ground.
