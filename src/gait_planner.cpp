@@ -62,22 +62,18 @@ void GaitPlanner::update_model(geometry_msgs::Twist& twist) {
 
         // Each gait period has many cycles depending on the gait mode. We can calculate the distance to be traversed
         // in one cycle.
-        float rotation_per_cycle = (gait_period_rotation_) * phase_time_ratio;
-        float distance_per_cycle = (gait_period_distance_) * phase_time_ratio;
-
         // (speed / publish rate) is the distance to be traversed in one compute frame (cycle).
         // This cycle is not the same as the gait cycle.
-        float dist_component = distance_per_cycle / (linear_speed_magnitude / publish_rate_);
-        float rotation_component = rotation_per_cycle / (angular_speed_magnitude / publish_rate_);
-
         if (angular_speed_magnitude >= angular_deadzone_) {
-            period_cycle_length_ = rotation_component;
+            float rotation_per_cycle = (gait_period_rotation_) * phase_time_ratio;
+            period_cycle_length_ = rotation_per_cycle / (angular_speed_magnitude / publish_rate_);;
             was_rotating_ = true;
         } else {
             // Get the distances in x and y-axis to move for one cycle (frame)
             cycle_distance_meters_local_frame_x = twist.linear.x / publish_rate_;
             cycle_distance_meters_local_frame_y = twist.linear.y / publish_rate_;
-            period_cycle_length_ = dist_component;
+            float distance_per_cycle = (gait_period_distance_) * phase_time_ratio;
+            period_cycle_length_ = distance_per_cycle / (linear_speed_magnitude / publish_rate_);;
             was_rotating_ = false;
         }
 
